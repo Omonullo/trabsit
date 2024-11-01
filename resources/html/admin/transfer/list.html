@@ -1,0 +1,108 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Переводы"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Переводы"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "История переводов"|t }} {% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Переводы"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form kt-form--label-right kt-margin-t-10 kt-margin-b-20">
+      <input type="hidden" name="sort" value="{{ request.parameters.query.sort }}">
+
+      <div class="form-row align-items-center mb-3">
+        <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+          <label class="font-weight-lighter">№ перевода</label>
+          <input type="text" class="form-control" name="number" value="{{ request.parameters.query.number }}"/>
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+          <label class="font-weight-lighter" for="create_time">{{ "Дата создания"|t }}</label>
+          <input type="text"
+                 id="create_time"
+                 name="create_time"
+                 class="form-control"
+                 autocomplete="off"
+                 value="{{ request.parameters.query.create_time|open-right-date-range }}">
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+          <label class="font-weight-lighter">{{ "Статус"|t }}</label>
+          <select class="form-control" name="status">
+            <option value=""></option>
+            {% for status in statuses %}
+            <option value="{{ status }}" {% ifequal status request.parameters.query.status %} selected {% endifequal %}>{{ status|transfer-status-name|t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+          <label class="font-weight-lighter">{{ "Расчетный счет"|t }}</label>
+          <input type="text" class="form-control" name="bank_account"
+                 value="{{ request.parameters.query.bank_account }}"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-4 px-3">
+          <button class="btn btn-outline-secondary">{{ "Поиск"|t }}</button>
+          <a href="?" class="btn btn-link">{{ "Сброс фильтра"|t }}</a>
+        </div>
+        <div class="col-md-6 col-sm-12 col-lg-8 px-3 text-right">
+          {{ "Количество"|t}} {{ count }}.
+          {{ "Сумма"|t}} {{ amount|money }}.
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="kt-portlet__body overflow-auto pt-0">
+    {% empty-wrapper paged-rows %}
+    <table class="table">
+      <thead>
+      <tr>
+        <th>{{ "Номер"|t }}</th>
+        <th>{{ "Расчетный счет"|t }}</th>
+        <th class="text-right">{{ "Сумма"|t }}</th>
+        <th>{{ "Дата создания"|t }}</th>
+        <th>{{ "Дата отправки"|t }}</th>
+        <th>{{ "Статус"|t }}</th>
+        <th class="text-right">{{ "Действие"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for transfer in paged-rows %}
+      <tr>
+        <td class="align-middle">{{ transfer.number }}</td>
+        <td><a style="line-height: 2.5rem; display: inline-block" href="{% path admin.transfer/view id @transfer.id %}">{{ transfer.bank_account }}</a></td>
+        <td class="align-middle text-right">{{ transfer.amount|money }} {{ "сум"|t }}</td>
+        <td class="align-middle">{{ transfer.create_time|local-date-time }}</td>
+        <td class="align-middle">{{ transfer.send_time|local-date-time }}</td>
+        <td class="align-middle">
+          <span class="kt-badge kt-badge--inline kt-badge--{{ transfer.status|transfer-status-color }} no-wrap">
+            {{ transfer.status|transfer-status-name|t }}
+          </span>
+        </td>
+        <td class="text-right">
+          {% ifequal transfer.status "created" %}
+          <form class="d-inline" method="post" action="{% path admin.transfer/send id @transfer.id %}">
+            {% csrf-field %}
+            <button class="btn btn-sm btn-clean btn-icon btn-icon-md confirm-click" data-confirmation='{{ "Вы точно хотите пометить перевод как отправленный?"|t }}'>
+              <i class="la la-check-square"></i>
+            </button>
+          </form>
+          {% endifequal %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    {% pager @total-pages @current-page @request.query-params %}
+    {% end-empty-wrapper %}
+  </div>
+</div>
+
+{% endblock %}

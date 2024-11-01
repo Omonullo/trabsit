@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "dokku": {
+      "postdeploy": "curl -X POST https://api.telegram.org/bot${DEPLOYMENT_BOT_TOKEN}/sendMessage -d text=\"Successful deploy\" -d chat_id=${DEPLOYMENT_BOT_CHAT_ID} -d parse_mode=MarkdownV2"
+    }
+  }
+}

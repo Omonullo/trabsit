@@ -1,0 +1,13 @@
+**
+!/.babelrc
+!/env
+!/package-lock.json
+!/package.json
+!/patches
+!/project.clj
+!/resources
+!/rollup.config.js
+!/src
+!/CHECKS
+!/app.json
+*/node_modules

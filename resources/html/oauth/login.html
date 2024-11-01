@@ -1,0 +1,102 @@
+{% extends "metronic/base.html" %}
+
+{% block title %}videoJarima - {{ "Сделаем дороги безопасными вместе"|t }}{% endblock %}
+
+{% block roof %}
+<link rel="stylesheet" href="/css/login.css">
+{% endblock %}
+
+{% block floor %}
+<script src="/js/login.js" type="module"></script>
+{% endblock %}
+
+{% block page %}
+<div class="container-fluid flex-grow-1 d-flex flex-column">
+  <div class="row flex-grow-1">
+    <div class="col-md-12 bg-white d-flex flex-column align-items-center justify-content-center">
+      <div class="kt-header__topbar kt-grid__item">
+        {% language-bar %}
+      </div>
+      <div class="login__form">
+        <div class="login__logo">
+          <a href="/login">
+            <img src="/img/logo.svg" width="160">
+          </a>
+        </div>
+
+        <form class="kt-form" action="/staff" method="post">
+          {% csrf-field %}
+          <h3 class="login__title">
+            videoJarima
+            <small>{{ "Сделаем дороги безопасными вместе"|t }}</small>
+          </h3>
+
+          {% if staff %}
+          <div class="form-group">
+            <input class="form-control {% if errors.username %}is-invalid{% endif %}" type="text" name="username" placeholder="{{ "Имя пользователя"|t }}" required value="{{ form.username }}">
+            {% for error in errors.username %}
+            <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group">
+            <input class="form-control {% if errors.password %}is-invalid{% endif %}" type="password" name="password" placeholder="{{ "Пароль"|t }}" required>
+            {% for error in errors.password %}
+            <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mt-4">
+            <button class="btn btn-primary btn-block">{{ "Авторизоваться"|t }}</button>
+          </div>
+          {% else %}
+            <div class="form-group">
+              <div class="d-flex align-items-center">
+                <div class="kt-input-icon kt-input-icon--left kt-input-icon--right">
+                  <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                    <span><i class="la la-phone"></i></span>
+                  </span>
+                  <input class="form-control" type="tel" name="phone" placeholder="{{ "Введите номер телефона"|t }}" required autocomplete="false">
+                  <div class="invalid-feedback"></div>
+                </div>
+              </div>
+              <span class="form-text text-muted">{{ "На указанный номер будет отправлен SMS с кодом подтверждения."|t }}</span>
+            </div>
+            <div class="collapse code_form">
+              <div class="form-group">
+                <div class="kt-input-icon kt-input-icon--left">
+                  <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                    <span><i class="la la-envelope"></i></span>
+                  </span>
+                  <input class="form-control" type="number" name="code" placeholder="{{ "Введите код подтверждения"|t }}" required>
+                  <div class="invalid-feedback"></div>
+                </div>
+                <span class="form-text text-muted"></span>
+                <button id="resend" disabled class="btn btn-hover-info btn-block" type="button"></button>
+              </div>
+            </div>
+            <div class="collapse password_form">
+              <div class="form-group">
+                <div class="kt-input-icon kt-input-icon--left">
+                  <input class="form-control" type="password" name="password" placeholder="{{ "Пароль"|t }}" required>
+                  <div class="invalid-feedback"></div>
+                  <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                    <span><i class="la la-lock"></i></span>
+                  </span>
+                </div>
+              </div>
+              <div class="mt-4">
+                <button type="submit" class="btn btn-primary btn-block">{{ "Авторизоваться"|t }}</button>
+              </div>
+              <div class="mt-4 text-center">
+                <a href="{% path misc/change-password %}">Забыли пароль?</a>
+              </div>
+            </div>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "metronic/base.html" %}
+
+{% block roof %}
+<style>
+  .register__logo {
+    text-align: center;
+    margin: 3rem auto 4rem auto;
+  }
+
+  .register__title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #6c7293;
+  }
+
+  .register__desc {
+    margin-top: 1.5rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #a7abc3;
+  }
+
+  .register__form {
+    margin-bottom: 2rem;
+  }
+
+  .register__form .form-control {
+    height: 46px;
+    border: none;
+    background: rgba(235, 237, 242, 0.4);
+  }
+
+  .register__form .form-group {
+    margin-bottom: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block floor %}
+<script>
+  $(function () {
+    $('input[name*=phone]').each(function (_, el) {
+      new IMask(el, {mask: '+998 00 000 00 00', definitions: {'9': /9/, '8': /8/}})
+    })
+  })
+</script>
+{% endblock %}
+
+{% block page %}
+<div class="container-fluid flex-grow-1 bg-white">
+  <div class="col-md-6 offset-md-3">
+    <div class="register__form">
+      <div class="register__logo">
+        <a href="#">
+          <img src="/img/logo.svg" width="160">
+        </a>
+      </div>
+
+      <h3 class="register__title">{{ "Регистрация"|t }}</h3>
+      <div class="register__desc">{{ "Расскажите, пожалуйста, несколько деталей о себе. Мы очень серьезно относимся к информационной безопасности. Ваши данные будут хранится в безопасности."|t }}</div>
+
+      <form class="kt-form" method="post">
+        {% csrf-field %}
+        <div class="form-group row">
+          <div class="col-sm-4">
+            <label>{{ "Имя"|t }}</label>
+            <input class="form-control" type="text" name="first_name" minlength="3" maxlength="32" required value="{{citizen.first_name}}">
+          </div>
+          <div class="col-sm-4">
+            <label>{{ "Фамилия"|t }}</label>
+            <input class="form-control" type="text" name="last_name" minlength="3" maxlength="32" required value="{{citizen.last_name}}">
+          </div>
+          <div class="col-sm-4">
+            <label>{{ "Отчество"|t }}</label>
+            <input class="form-control" type="text" name="middle_name" minlength="3" maxlength="32" required value="{{citizen.middle_name}}">
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-sm-4">
+            <label>{{ "Номер телефона"|t }}</label>
+            <input class="form-control" type="tel" name="phone" disabled value="{{ phone }}">
+            <span class="form-text text-muted">{{ "Внимание! Это Ваш логин для входа"|t }}</span>
+          </div>
+          <div class="col-sm-4">
+            <label>{{ "Дополнительный номер"|t }}</label>
+            <input class="form-control" type="tel" name="second_phone" placeholder="+998 90 000 00 00" value="{{citizen.second_phone}}" pattern="\+998 \d{2} \d{3} \d{2} \d{2}">
+          </div>
+          <div class="col-sm-4">
+            <label>{{ "Email адрес"|t }}</label>
+            <input class="form-control" type="text" name="email" maxlength="64" placeholder="misol@misol.uz" value="{{citizen.email}}">
+            <span class="form-text text-muted">{{ "Если заполните, то будете получать уведомления на email"|t }}</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{{ "Адрес проживания"|t }}</label>
+          <div class="row">
+            <div class="col-sm-6">
+              {% area-select area_id true @citizen.area_id %}
+            </div>
+            <div class="col-sm-6">
+              {% district-select district_id true @citizen.district_id %}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="row">
+            <div class="col-sm-9">
+              <input class="form-control" type="text" required placeholder="{{ "Поселок/Массив/Улица/Дом"|t }}" name="address">
+              <span class="form-text text-muted">{{ "Мы используем эту информацию для почтовых корреспонденции и аналитики"|t }}</span>
+            </div>
+            <div class="col-sm-3">
+              <input class="form-control" type="text" name="zipcode" value="{{citizen.zipcode}}" maxlength="6" placeholder="{{ "Почтовый индекс"|t }}">
+            </div>
+          </div>
+        </div>
+        <div class="my-4">
+          <label class="kt-checkbox kt-checkbox--primary mb-4">
+            <input class="form-check-input" type="checkbox" required>
+            <span></span>
+
+            {{ "Я ознакомлен(а) с условиями <a href='%s' target='_blank'>публичной оферты</a> и согласен(а) на обработку персональных данных"|t:"/terms" }}
+          </label>
+        </div>
+        <div class="text-center">
+          <button id="kt_login_signup_submit" class="btn btn-primary btn-elevate login__btn-primary">{{ "Отправить"|t }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

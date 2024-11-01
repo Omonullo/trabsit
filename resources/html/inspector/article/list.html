@@ -1,0 +1,51 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}
+  {{ "Статьи"|t }}
+{% endblock %}
+
+{% block sub-header-title %}
+  {{ "Статьи"|t }}
+{% endblock %}
+
+{% block sub-header-sub-title %}
+  {{ "Статьи для приминения к нарушениям"|t }}
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Статьи"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>{{ "Код"|t }}</th>
+        <th>{{ "Штраф"|t }}</th>
+        <th>
+          {{ "Краткий текст"|t }} / {{ "Текст"|t }}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for article in articles %}
+      <tr>
+        <td>{{ article.id }}</td>
+        <td>{% if article.factor %} {{ article.factor }} МРЗП {% endif %}</td>
+        <td>
+          <div>{{ article|t-get:alias }}</div>
+          <div class="text-muted">{{ article.number }}. {{ article|t-get:text }}</div>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

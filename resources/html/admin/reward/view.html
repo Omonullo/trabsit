@@ -1,0 +1,242 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Вознаграждение"|t }} №{{ reward.number }}{% endblock %}
+{% block sub-header-title %} {{ "Вознаграждение"|t }} №{{ reward.number }} {% endblock %}
+
+
+{% block roof %}
+<style>
+  .modal-body {
+    overflow-x: auto;
+  }
+
+  code {
+    white-space: pre-wrap;
+    display: block;
+    min-width: 600px;
+  }
+</style>
+{% endblock %}
+
+{% block floor %}
+<script>
+  $('input[name="params[phone]"]').each(function (_, el) {
+    new IMask(el, {mask: '+998 00 000 00 00', definitions: {'9': /9/, '8': /8/}})
+  });
+
+  $(':input[name=type]').on('change', function (event) {
+    $(':input[name*=params]').prop('disabled', true).prop('required', false).closest('.row').hide();
+    $(`:input[name="params[${event.target.value}]"]`).prop('disabled', false).prop('required', true).closest('.row').show();
+  }).trigger('change');
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ reward.status|reward-status-color }} pr-0">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Общие данные"|t }}
+      </h3>
+    </div>
+
+    <div class="kt-portlet__head-toolbar align-items-center">
+      {% if reward.payment_log %}
+      <button type="button"
+              class="btn btn-sm btn-outline-info reward__log__btn"
+              data-toggle="modal"
+              data-target="#payment_log_modal">
+        {{ "Логи отправки"|t }}
+      </button>
+      {% endif %}
+
+      <div class="kt-ribbon__target">
+        <span class="kt-ribbon__inner"></span>
+        {{ reward.status|reward-status-name|t }}
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <div class="row" style="margin-top: -1rem">
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Номер видеозаписи"|t }}</div>
+        <div><a href="{% path staff.report/view id @reward.report.id %}">{{ reward.report.number }}</a></div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Номер нарушения"|t }}</div>
+        <div><a href="{% path staff.report/view id @reward.report.id %}#{{ reward.offense.number }}">{{ reward.offense.number }}</a></div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Сумма вознаграждения"|t }}</div>
+        <div>{{ reward.amount|money }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Сумма штрафа"|t }}</div>
+        <div>{{ reward.offense.fine|money }}</div>
+      </div>
+      {% if reward.staff %}
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Инспектор"|t }}</div>
+        <div>{{ reward.staff|citizen-name }} ({{ reward.staff.rank }})</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Телефон инспектора"|t }}</div>
+        <div>({{ reward.staff.phone|phone }})</div>
+      </div>
+      {% else %}
+        <div class="col-md-6 mt-3">
+          <div class="kt-label-font-color-2">{{ "Гражданин"|t }}</div>
+          <div>{{ reward.citizen|citizen-name }} ({{ reward.citizen.phone|phone }})</div>
+        </div>
+      {% endif %}
+
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Регион"|t }}</div>
+        <div>{{ reward.report|address:false }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Дата создания"|t }}</div>
+        <div>{{ reward.create_time|local-date-time }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Данные оплаты"|t }}</div>
+        <div>{{ reward.params|reward }}</div>
+      </div>
+      {% ifequal reward.status "failed" %}
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Время ошибки"|t }}</div>
+        <div>{{ reward.failure_time|local-date-time }}</div>
+      </div>
+      {% endifequal %}
+      {% if reward.failure_message %}
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Причина ошибки"|t }}</div>
+        <div class="text-danger">{{ reward.failure_message }}</div>
+      </div>
+      {% endif %}
+      {% if reward.transaction_number %}
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Номер транзакции"|t }}</div>
+        <div><pre>{{ reward.transaction_number }}</pre></div>
+      </div>
+      {% endif %}
+      {% ifequal reward.status "paid" %}
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Время оплаты"|t }}</div>
+        <div>{{ reward.pay_time|local-date-time }}</div>
+      </div>
+      {% endifequal %}
+      {% if reward.transfer %}
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Номер перевода"|t }}</div>
+        <div><a href="{% path admin.transfer/view id @reward.transfer.id %}">{{ reward.transfer.number }}</a></div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if reward.payment_result %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Резултат отправки"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <code>{{ reward.payment_result|pretty-json }}</code>
+  </div>
+</div>
+{% endif %}
+
+
+{% if reward.failure_message %}
+{% ifequal reward.status "failed" %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Повторная отправка"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form method="post" action="{% path admin.reward/repay id @reward.id %}">
+      {% csrf-field %}
+      <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Вид вознаграждения"|t }}</label>
+            <div class="col-md-9">
+              <select required class="form-control" name="type">
+                {% for type in types %}
+                <option value="{{ type.0 }}" {% ifequal type.0 reward.type %} selected {% endifequal %} >{{ type.1.name|t }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row" style="display: none">
+            <label class="col-md-3 col-form-label">{{ "Номер телефона"|t }}</label>
+            <div class="col-md-9">
+              <input type="text" name="params[phone]" class="form-control" value="{{ reward.params.phone|default:@reward.citizen.phone }}">
+            </div>
+          </div>
+          <div class="form-group row" style="display: none">
+            <label class="col-md-3 col-form-label">{{ "Номер карты"|t }}</label>
+            <div class="col-md-9">
+              <input type="hidden" name="params[card]" class="form-control" value="true">
+              {{ "Вознаграждения будут перечислены на банковскую карту, указанную в профиле. Процесс перевода средств осуществляется ежедневно на основе совокупности всех зачислений, подлежащих выплате на данный момент. Следовательно, все начисленные вознаграждения за период будут объединены в один платеж." | t }}
+            </div>
+          </div>
+          <div class="form-group row" style="display: none">
+            <label class="col-md-3 col-form-label">{{ "Благотворительный фонд"|t }}</label>
+            <div class="col-md-9">
+              <select class="form-control" name="params[fund]">
+                {% for fund in funds %}
+                <option {% ifequal reward.params.fund fund %} selected {% endifequal %}>{{ fund }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row" style="display: none">
+            <label class="col-md-3 col-form-label">{{ "Юрлицо"|t }}</label>
+            <div class="col-md-9">
+              <select class="form-control" name="params[bank]">
+                {% for organization in organizations %}
+                <option {% ifequal reward.params.bank organization.bank_account %} selected {% endifequal %} value="{{ organization.bank_account }}">{{ organization.name }} - {{ organization.bank_account }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3">
+            </div>
+            <div class="col-md-9">
+              <button type="submit" class="btn btn-success mr-2">{{ "Сохранить и отправить повторно"|t }}</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2"></div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endifequal %}
+{% endif %}
+
+<div class="modal fade" tabindex="-1" id="payment_log_modal">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ "Логи отправки"|t }}</h5>
+      </div>
+      <div class="modal-body">
+        <code>{{ reward.payment_log }}</code>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

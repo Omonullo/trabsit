@@ -1,0 +1,206 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Вознаграждения"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Вознаграждения"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "Список вознаграждений"|t }} {% endblock %}
+
+{% block content %}
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {{ "Вознаграждения"|t }}
+        </h3>
+      </div>
+      <div class="kt-portlet__head-toolbar">
+        {% ifequal request.parameters.query.status "failed" %}
+        {% if total-count > 0 %}
+        <form method="post" action="{% path admin.reward/repay-all %}" class="mr-2">
+          {% csrf-field %}
+          {% for item in request.query-params %}
+            <input type="hidden" name="{{item|first}}" value="{{item|last}}" />
+          {% endfor %}
+          <button type="submit" class="btn btn-sm btn-label-danger reward__log__btn ml-2">
+            {{ "Отправить все повторно"|t }}
+          </button>
+        </form>
+        {% endif %}
+        {% endifequal %}
+
+        {% ifequal request.identity.role "admin" %}
+        {% ifequal request.parameters.query.status "created" %}
+        {% ifequal request.parameters.query.type "bank" %}
+        {% if total-count > 0 %}
+        <form method="post" action="{% path admin.transfer/create %}" class="mr-2">
+          {% csrf-field %}
+          <button type="submit" class="btn btn-sm btn-label-danger ml-2">
+            {{ "Оформить переводы"|t }}
+          </button>
+        </form>
+        {% endif %}
+        {% endifequal %}
+        {% endifequal %}
+        {% endifequal %}
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <form class="kt-form kt-form--label-right kt-margin-t-10 kt-margin-b-20">
+        <div class="form-row align-items-center mb-3">
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">№ нарушения</label >
+            <input type="text" class="form-control" name="number" value="{{ request.parameters.query.number }}"/>
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter" for="create_time">{{ "Дата создания"|t }}</label>
+            <input type="text"
+                   id="create_time"
+                   name="create_time"
+                   class="form-control"
+                   autocomplete="off"
+                   value="{{ request.parameters.query.create_time|open-right-date-range }}">
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Город или область"|t }}</label>
+            {% area-select area_id false @request.parameters.query.area_id true %}
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter ">{{ "Район"|t }}</label>
+            {% district-select district_id false @request.parameters.query.district_id true %}
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Статус"|t }}</label>
+            <select class="form-control" name="status">
+              <option value=""></option>
+              {% for status in statuses %}
+                <option value="{{ status }}" {% ifequal status request.parameters.query.status %} selected {% endifequal %}>{{ status|reward-status-name|t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Тип"|t }}</label>
+            <select class="form-control" name="type">
+              <option value=""></option>
+              {% for type in types %}
+                <option value="{{ type.0 }}" {% ifequal type.0 request.parameters.query.type %} selected {% endifequal %}>{{ type.1.name|t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Причина ошибки"|t }}</label>
+            <select class="form-control" name="failure_message">
+              <option></option>
+              {% for message in failure_messages %}
+              <option value="{{ message }}" {% ifequal message request.parameters.query.failure_message %} selected {% endifequal %}>
+                {{ message }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Роль получателя"|t }}</label>
+            <select class="form-control" name="receiver_role">
+              <option value=""></option>
+              <option value="inspector" {% ifequal "inspector" request.parameters.query.receiver_role %}selected{% endifequal %}>
+                {{ "Инпектор"|t }}
+              </option>
+              <option value="citizen" {% ifequal "citizen" request.parameters.query.receiver_role %}selected{% endifequal %}>
+                {{ "Гражданин"|t }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Гражданин"|t }}</label>
+            <select class="form-control" name="citizen_id" data-url="/staff/reports/citizen">
+              <option value="">Все...</option>
+              {% for citizen in citizens %}
+                <option value="{{ citizen.id }}" {% ifequal citizen.id request.parameters.query.citizen_id %} selected {% endifequal %}>
+                  {{ citizen.first_name }} {{ citizen.last_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Инспектор"|t }}</label>
+            <select class="form-control" name="staff_id" data-url="/staff/reports/staff">
+              <option value="">Все...</option>
+              {% for inspector in staff %}
+                <option value="{{ inspector.id }}" {% ifequal inspector.id request.parameters.query.staff_id %} selected {% endifequal %}>
+                  {{ inspector.first_name }} {{ inspector.last_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-4 px-3">
+            <button class="btn btn-outline-secondary">{{ "Поиск"|t }}</button>
+            <a href="?" class="btn btn-link">{{ "Сброс фильтра"|t }}</a>
+          </div>
+          <div class="col-md-6 col-sm-12 col-lg-8 px-3 text-right">
+            {{ "Количество"|t}} {{ count }}.
+            {{ "Сумма"|t}} {{ amount|money }}.
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="kt-portlet__body overflow-auto pt-0">
+      {% empty-wrapper paged-rows %}
+      <table class="table" style="min-width: 850px;">
+        <thead>
+        <tr>
+          <th>№</th>
+          {% ifequal "inspector" request.parameters.query.receiver_role %}
+            <th>{{ "Инспектор"|t }} / {{ "Звание"|t }}</th>
+            {% else %}
+            <th>{{ "Гражданин"|t }} / {{ "Регион"|t }}</th>
+          {% endifequal %}
+
+          <th>{{ "Данные оплаты"|t }} / {{ "Сумма"|t }}</th>
+          <th>{{ "Дата создания"|t }}</th>
+          <th class="text-right">{{ "Статус"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for reward in paged-rows %}
+        <tr>
+          <td>{{ reward.number }}</td>
+          {% if reward.staff_id %}
+            <td>
+              <i class="la la-user kt-label-font-color-1"></i> {{ reward|staff-name }}
+              <br>
+              {{ reward.staff_rank }}
+            </td>
+            {% else %}
+            <td>
+              <i class="la la-user kt-label-font-color-1"></i> {{ reward|citizen-name }}
+              <br>
+              <i class="la la-phone kt-label-font-color-1"></i> {{ reward.phone|phone }}
+            </td>
+          {% endif %}
+
+          <td>
+            <i class="la la-cog kt-label-font-color-1"></i> <a href="{% path admin.reward/view id @reward.id %}">{{ reward.params|reward }}</a>
+            <br>
+            <i class="la la-money kt-label-font-color-1"></i> {{ reward.amount|money }} {{ "сум"|t }}
+          </td>
+          <td>
+            <i class="la la-calendar kt-label-font-color-1"></i> {{ reward.create_time|local-date-time }}
+          </td>
+          <td class="text-right">
+            <span class="kt-badge kt-badge--inline kt-badge--{{ reward.status|reward-status-color }} no-wrap"
+                  {% if reward.failure_message %}
+                  title="{{ reward.failure_message }}"
+                  {% endif %}>
+              {{ reward.status|reward-status-name|t }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+      {% pager @total-pages @current-page @request.query-params %}
+      {% end-empty-wrapper %}
+    </div>
+  </div>
+{% endblock %}

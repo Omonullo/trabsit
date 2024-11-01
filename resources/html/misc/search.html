@@ -1,0 +1,127 @@
+{% extends "metronic/index.html" %}
+{% block title %}{{ "Поиск"|t }}{% endblock %}
+
+{% block roof %}
+  <style>
+    .search {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search i {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.5;
+      font-size: 1.3rem;
+      left: 1.5rem;
+    }
+
+    .search button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      right: 0;
+      padding: 0.7rem 0.8rem;
+      margin-right: 0.6rem;
+      border: none !important;
+    }
+
+    .search input {
+      padding-left: 3.5rem;
+      box-shadow: 0 0 13px 0 rgba(82,63,105,0.05);
+    }
+
+    .search input:focus,
+    .search input:active {
+      box-shadow: 0 0 13px 0 rgba(82,63,105,0.05) !important;
+    }
+  </style>
+{% endblock %}
+
+{% block floor %}
+
+{% endblock %}
+
+{% block sub-header %}
+{% endblock %}
+
+{% block header-class %}kt-header--seamless{% endblock %}
+
+{% block content %}
+{% if request.parameters.query.q %}
+<form method="get">
+  <div class="row mt-4 mb-5">
+    <div class="col-md-12">
+      <div class="search search--large">
+        <i class="flaticon2-search-1"></i></span>
+        <input name="q" type="text" value="{{ request.parameters.query.q }}" class="form-control form-control-lg form-control-pill" placeholder="{{ "Введите номер постановления или гос-номер авто-транспорта"|t }}">
+        <button type="submit" class="btn btn-lg btn-pill btn-default">{{ "Поиск"|t }}</button>
+      </div>
+    </div>
+  </div>
+</form>
+<div class="kt-portlet mt-4">
+  <div class="kt-portlet__body">
+    {% empty-wrapper offenses %}
+    <table class="table">
+      <thead>
+      <tr>
+        <th>{{ "Фото"|t }}</th>
+        <th>{{ "Место события"|t }}</th>
+        <th>{{ "Номер постановления"|t }}</th>
+        <th>{{ "Гос-номер"|t }}</th>
+        <th>{{ "Время"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for offense in offenses %}
+      <tr>
+        <td>
+          {% if offense.report.thumbnail %}
+          <img class="report__thumbnail mr-4" src="{{ offense.report.thumbnail }}">
+          {% endif %}
+        </td>
+        <td>
+          <div class="d-flex flex-row align-items-center">
+            <a href="{% path asbt/view id @offense.short-id %}">
+              <div class="flex-grow-1">
+                <i class="la la-map kt-font-danger"></i>
+                {{ offense.report|address:true:true|linebreaks-br|safe }}
+              </div>
+            </a>
+          </div>
+        </td>
+        <td class="align-middle">
+          {{ offense.fine_id }}
+        </td>
+        <td class="align-middle">
+          <span class="vehicle_id vehicle_id-sm">{{ offense.vehicle_id }}</span>
+        </td>
+        <td class="align-middle">
+          <i class="la la-calendar kt-label-font-color-1"></i> {{ offense.report.incident_time|local-date-time }}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% end-empty-wrapper %}
+  </div>
+</div>
+{% else %}
+<div class="d-flex h-100 flex-column justify-content-center">
+  <form method="get">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <div class="search search--large">
+          <i class="flaticon2-search-1"></i></span>
+          <input name="q" type="text" value="{{ request.parameters.query.q }}" class="form-control form-control-lg form-control-pill" autofocus placeholder="{{ "Введите номер постановления или гос-номер авто-транспорта"|t }}">
+          <button type="submit" class="btn btn-lg btn-pill btn-default">{{ "Поиск"|t }}</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

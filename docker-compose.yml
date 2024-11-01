@@ -1,0 +1,66 @@
+services:
+  jarima-app:
+    image: ghcr.io/kashuz/ejarima:latest
+    ports:
+      - 5000:5000
+    env_file:
+      - .env
+  db:
+    image: postgres:11
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: jarima
+      POSTGRES_PASSWORD: jarima
+      POSTGRES_DB: jarima
+
+  s3_archive:
+    image: minio/minio:RELEASE.2019-03-27T22-35-21Z
+    ports:
+      - 9090:9090
+    volumes:
+      - ./data/s3_archive:/data
+    command: server /data
+    environment:
+      MINIO_ACCESS_KEY: "minio_access_key"
+      MINIO_SECRET_KEY: "initial-2018"
+
+  s3_0:
+    image: minio/minio:RELEASE.2019-03-27T22-35-21Z
+    volumes:
+      - ./data/s3_0:/data
+    command: server /data
+    ports:
+      - 9001:9000
+    environment:
+      MINIO_ACCESS_KEY: "minio_access_key"
+      MINIO_SECRET_KEY: "initial-2018"
+  share_files:
+    image: minio/minio:RELEASE.2019-03-27T22-35-21Z
+    volumes:
+      - ./data:/data
+    command: server /data
+    ports:
+      - 8090:9000
+    environment:
+      MINIO_ACCESS_KEY: "minio_access_key"
+      MINIO_SECRET_KEY: "initial-2018"
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+
+#  watch:
+#    image: node
+#    working_dir: /app
+#    ports:
+#      - 35729:35729
+#    volumes:
+#      - ./:/app
+#    environment:
+#      - CHOKIDAR_USEPOLLING=true
+#    command: sh -c "npm install && npm run dev"
+volumes:
+  postgres: { }

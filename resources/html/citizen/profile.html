@@ -1,0 +1,137 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Профиль"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Профиль"|t }} {% endblock %}
+{% block sub-header-sub-title %}Ваши персональные данные{% endblock %}
+
+{% block floor %}
+<script>
+  $(function () {
+    $('input[name*=phone]').each(function (_, el) {
+      new IMask(el, {mask: '+998 00 000 00 00', definitions: {'9': /9/, '8': /8/}})
+    });
+
+    $('input[name=card]').card();
+  })
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div class="kt-portlet kt-portlet--height-fluid">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">{{ "Редактирование профиля"|t }}</h3>
+    </div>
+    <div class="kt-portlet__head-toolbar">
+      <a href="{% path misc/change-password %}" class="btn btn-outline-brand">
+        {{ "Изменить пароль"|t }}
+      </a>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form pt-4 pb-4" method="post">
+      {% csrf-field %}
+      <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+          <div class="kt-section kt-section--first">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Личные данные"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Имя"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="first_name" maxlength="32" required value="{{citizen.first_name}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Фамилия"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="last_name" maxlength="32" required value="{{citizen.last_name}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Отчество"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="middle_name" maxlength="32" required value="{{citizen.middle_name}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Номер телефона"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="tel" disabled name="phone" value="{{citizen.phone}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Дополнительный номер"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="tel" name="second_phone" value="{{citizen.second_phone}}" pattern="\+998 \d{2} \d{3} \d{2} \d{2}">
+                </div>
+              </div>
+              <div class="form-group form-group-last row">
+                <label class="col-md-3 col-form-label">{{ "Email адрес"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="email" maxlength="64" value="{{citizen.email}}">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="kt-separator kt-separator--border-dashed kt-separator--space-lg"></div>
+          <div class="kt-section">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Адресные данные"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Город или область"|t }}</label>
+                <div class="col-md-9">
+                  {% area-select area_id true @citizen.area_id %}
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Район"|t }}</label>
+                <div class="col-md-9">
+                  {% district-select district_id true @citizen.district_id %}
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Поселок/Массив/Улица/Дом"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="address" value="{{citizen.address}}" required="true">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Почтовый индекс"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="zipcode" maxlength="6" value="{{citizen.zipcode}}" required="true">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="kt-separator kt-separator--border-dashed kt-separator--space-lg"></div>
+          <div class="kt-section kt-section--last">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Платежные данные"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Номер карты"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="card" value="{{citizen.card}}" pattern="8600 \d{4} \d{4} \d{4}">
+                  <span class="form-text text-primary"></span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-9">
+                  <button type="submit" class="btn btn-success mr-2">{{ "Сохранить"|t }}</button>
+                  <button type="reset" class="btn btn-secondary" onclick="history.go(-1)">{{ "Назад"|t }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2"></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

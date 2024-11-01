@@ -1,0 +1,145 @@
+{% extends "metronic/index.html" %}
+
+
+{% block title %}
+  {% if faq.id %}{{ "Вопрос"|t }}№{{ faq.number }}
+  {% else %}
+    {{ "Новый вопрос"|t }}
+  {% endif %}
+{% endblock %}
+
+{% block sub-header-title %}
+  {% if faq.id %}{{ "Вопрос"|t }}№{{ faq.number }}
+  {% else %}
+    {{ "Новый вопрос"|t }}
+  {% endif %}
+{% endblock %}
+
+{% block sub-header-sub-title %}
+  {% if faq.id %}Редактирование ворпоса
+  {% else %}
+    {{ "Создание вопроса"|t }}
+  {% endif %}
+{% endblock %}
+
+{% block floor %}
+<script>
+  $(function () {
+    $('select[name*=category]').each(function () {
+      $(this).select2({
+        tags: true,
+        placeholder: $(this).attr('placeholder')
+      })
+    });
+  })
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div class="kt-portlet kt-portlet--height-fluid">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {% if faq.id %}
+          {{ "Вопрос"|t }} №{{ faq.number }}
+        {% else %}
+          {{ "Новый вопрос"|t }}
+        {% endif %}</h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form pt-4 pb-4" method="post">
+      {% csrf-field %}
+      <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Раздел"|t }}<span class="kt-font-success"> ru </span></label>
+            <div class="col-md-9">
+              <select required class="form-control m-select2" name="category_ru" placeholder="{{ "Выберите или создайте новый раздел"|t }}">
+                <option></option>
+                {% for category in categories_ru %}
+                <option {% ifequal faq.category_ru category %} selected {% endifequal %} >{{ category }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Раздел"|t }}<span class="kt-font-success"> ўз </span></label>
+            <div class="col-md-9">
+              <select required class="form-control m-select2" name="category_uz_cy" placeholder="{{ "Выберите или создайте новый раздел"|t }}">
+                <option></option>
+                {% for category in categories_uz_cy %}
+                <option {% ifequal faq.category_uz_cy category %} selected {% endifequal %} >{{ category }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Раздел"|t }}<span class="kt-font-success"> uz </span></label>
+            <div class="col-md-9">
+              <select required class="form-control m-select2" name="category_uz_la" placeholder="{{ "Выберите или создайте новый раздел"|t }}">
+                <option></option>
+                {% for category in categories_uz_la %}
+                <option {% ifequal faq.category_uz_la category %} selected {% endifequal %} >{{ category }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Вопрос"|t }}<span class="kt-font-success"> ru </span></label>
+            <div class="col-md-9">
+              <input required type="text" class="form-control" name="question_ru" value="{{ faq.question_ru }}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Вопрос"|t }}<span class="kt-font-success"> ўз </span></label>
+            <div class="col-md-9">
+              <input required type="text" class="form-control" name="question_uz_cy" value="{{ faq.question_uz_cy }}">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Вопрос"|t }}<span class="kt-font-success"> uz </span></label>
+            <div class="col-md-9">
+              <input required type="text" class="form-control" name="question_uz_la" value="{{ faq.question_uz_la }}">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Ответ"|t }}<span class="kt-font-success"> ru </span></label>
+            <div class="col-md-9">
+              <textarea required name="answer_ru" class="form-control" data-provide="markdown" rows="10">{{ faq.answer_ru }}</textarea>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Ответ"|t }}<span class="kt-font-success"> ўз </span></label>
+            <div class="col-md-9">
+              <textarea required name="answer_uz_cy" class="form-control" data-provide="markdown" rows="10">{{ faq.answer_uz_cy }}</textarea>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Ответ"|t }}<span class="kt-font-success"> uz </span></label>
+            <div class="col-md-9">
+              <textarea required name="answer_uz_la" class="form-control" data-provide="markdown" rows="10">{{ faq.answer_uz_la }}</textarea>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3">
+            </div>
+            <div class="col-md-9">
+              <button type="submit" class="btn btn-success mr-2">{{ "Сохранить"|t }}</button>
+              <button type="reset" class="btn btn-secondary" onclick="history.go(-1)">{{ "Назад"|t }}</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2"></div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

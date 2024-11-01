@@ -1,0 +1,39 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Причины отклонений"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Причины отклонений"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "Текст причин отклонений"|t }} {% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Причины отклонений"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>№</th>
+        <th>{{ "Текст"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for response in responses %}
+      <tr>
+        <td>{{ response.number }}</td>
+        <td>
+          <div>{{ response|t-get:alias }}</div>
+          <div class="text-muted">{{ response|t-get:text }}</div>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

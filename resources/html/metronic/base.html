@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>{% block title %}{% endblock %}</title>
+  <meta name="description" content='{{ sub-title|default:"Write grate page description" }}'>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="/npm/metronic-fonts/fonts.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/bootstrap-datetime-picker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/bootstrap-markdown/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/metronic-framework/vendors/line-awesome/css/line-awesome.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/metronic-framework/vendors/flaticon/flaticon.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/metronic-framework/vendors/flaticon2/flaticon.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/metronic-framework/vendors/fontawesome5/css/all.min.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/photoswipe/dist/photoswipe.css" rel="stylesheet">
+  <link href="/npm/photoswipe/dist/default-skin/default-skin.css" rel="stylesheet">
+  <link href="/css/metronic.css" rel="stylesheet" type="text/css"/>
+  <link href="/css/screen.css" rel="stylesheet" type="text/css"/>
+  <link rel="shortcut icon" href="/favicon.ico"/>
+  {% block roof %}{% endblock %}
+</head>
+
+<body class=" kt-page--fixed kt-header--fixed kt-header-mobile--fixed kt-subheader--enabled kt-subheader--transparent">
+  {% block page %}{% endblock %}
+  <script>
+    var KTAppOptions = {};
+  </script>
+  <script src="/npm/promise-polyfill/dist/polyfill.min.js" type="text/javascript"></script>
+  <script src="/npm/jquery/dist/jquery.min.js" type="text/javascript"></script>
+  <script src="/npm/popper.js/dist/umd/popper.min.js" type="text/javascript"></script>
+  <script src="/npm/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+  <script src="/npm/moment/min/moment.min.js" type="text/javascript"></script>
+  {% ifequal request.locale|name "uz_la" %}
+  <script src="/npm/moment/locale/uz-latn.js" type="text/javascript"></script>
+  {% endifequal %}
+  {% ifequal request.locale|name "uz_cy" %}
+  <script src="/npm/moment/locale/uz.js" type="text/javascript"></script>
+  {% endifequal %}
+  {% ifequal request.locale|name "ru" %}
+  <script src="/npm/moment/locale/ru.js" type="text/javascript"></script>
+  {% endifequal %}
+  <script src="/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+  <script src="/npm/metronic-framework/components/vendors/bootstrap-datepicker/init.js" type="text/javascript"></script>
+  <script src="/npm/bootstrap-datetime-picker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+  <script src="/npm/bootstrap-timepicker/js/bootstrap-timepicker.min.js" type="text/javascript"></script>
+  <script src="/npm/metronic-framework/components/vendors/bootstrap-timepicker/init.js" type="text/javascript"></script>
+  <script src="/npm/bootstrap-daterangepicker/daterangepicker.js" type="text/javascript"></script>
+  <script src="/npm/select2/dist/js/select2.full.min.js" type="text/javascript"></script>
+  <script src="/npm/select2/dist/js/i18n/ru.js" type="text/javascript"></script>
+  <script src="/npm/autosize/dist/autosize.min.js" type="text/javascript"></script>
+  <script src="/npm/bootstrap-markdown/js/bootstrap-markdown.js" type="text/javascript"></script>
+  <script src="/npm/metronic-framework/components/vendors/bootstrap-markdown/init.js" type="text/javascript"></script>
+  <script src="/npm/jquery.repeater/jquery.repeater.min.js" type="text/javascript"></script>
+  <script src="/npm/imask/dist/imask.min.js" type="text/javascript"></script>
+  <script src="/npm/photoswipe/dist/photoswipe.min.js"></script>
+  <script src="/npm/photoswipe/dist/photoswipe-ui-default.min.js"></script>
+  <script src="/npm/countup.js/dist/countUp.js" type="module"></script>
+  <script src="/demo/base/scripts.bundle.js" type="text/javascript"></script>
+  <script src="/npm/bootstrap4-notify/bootstrap-notify.js" type="text/javascript"></script>
+  <script src="/npm/bootstrap4-notify/bootstrap-notify.js" type="text/javascript"></script>
+  <script src="/js/translations.js" type="text/javascript"></script>
+  <script src="/js/script.js" type="text/javascript"></script>
+  {% block floor %}{% endblock %}
+  <script async
+          src="https://api-maps.yandex.ru/2.1/?lang={{ request.locale|name|default:ru }}&mode=release&onload=init_map&apikey=9dc80b3d-30fb-41a8-92e5-f6418374071d"></script>
+  {% if env.prod %}
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7VTG46HCJZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-7VTG46HCJZ');
+  </script>
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+    (function (m, e, t, r, i, k, a) {
+      m[i] = m[i] || function () {
+        (m[i].a = m[i].a || []).push(arguments)
+      };
+      m[i].l = 1 * new Date();
+      k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+    })
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+    ym(70940476, "init", {
+      clickmap: true,
+      trackLinks: true,
+      accurateTrackBounce: true,
+      webvisor: true
+    });
+  </script>
+  {% ifequal request.identity.role "admin" %}
+  <!-- Start of Rocket.Chat Livechat Script -->
+  <script type="text/javascript">
+    (function (w, d, s, u) {
+      w.ejarima_guest_token = "{{ request.identity.id }}"
+      w.ejarima_name = "{{ request.identity.first_name }} {{ request.identity.last_name }} {{ request.identity.middle_name }}"
+      w.ejarima_email = "{{ request.identity.email }} "
+      w.ejarima_phone = "{{ request.identity.phone }}"
+      if (w.ejarima_guest_token) {
+        w.SERVER_URL = "http://rocket.ejarima.kash.uz"
+
+        w.RocketChat = function (c) {
+          w.RocketChat._.push(c)
+        };
+        w.RocketChat._ = [];
+        w.RocketChat.url = u;
+        var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
+        j.async = true;
+        j.src = 'http://rocket.ejarima.kash.uz/livechat/rocketchat-livechat.min.js?_=201903270000';
+        h.parentNode.insertBefore(j, h);
+      }
+
+      if (w.ejarima_guest_token) {
+        RocketChat(function () {
+          const chat = this;
+          chat.showWidget()
+
+          this.onServiceOffline(function (data) {
+            chat.hideWidget()
+          });
+          this.initialize({
+            theme: {
+              color: '#04436A',
+              fontColor: '#FFFFFF',
+              iconColor: '#1d74f5',
+              title: "EJarima Support",
+              offlineTitle: "Сервис отключён",
+            },
+            department: 'Граждане',
+            guestToken: w.ejarima_guest_token,
+            guestName: w.ejarima_name,
+            guestEmail: w.ejarima_email,
+            customField: {
+              ejarima_phone: w.ejarima_phone
+            },
+            language: 'ru',
+          });
+        })
+      }
+
+    })(window, document, 'script', 'http://rocket.ejarima.kash.uz/livechat');
+  </script>
+  {% endifequal %}
+  <noscript>
+    <div><img src="https://mc.yandex.ru/watch/70940476" style="position:absolute; left:-9999px;" alt=""/></div>
+  </noscript>
+  <!-- /Yandex.Metrika counter -->
+  {% endif %}
+  <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true" id="pswp">
+    <div class="pswp__bg"></div>
+    <div class="pswp__scroll-wrap">
+      <div class="pswp__container">
+        <div class="pswp__item"></div>
+        <div class="pswp__item"></div>
+        <div class="pswp__item"></div>
+      </div>
+      <div class="pswp__ui pswp__ui--hidden">
+        <div class="pswp__top-bar">
+          <div class="pswp__counter"></div>
+          <button class="pswp__button pswp__button--close"></button>
+          <button class="pswp__button pswp__button--fs"></button>
+          <button class="pswp__button pswp__button--zoom"></button>
+          <div class="pswp__preloader">
+            <div class="pswp__preloader__icn">
+              <div class="pswp__preloader__cut">
+                <div class="pswp__preloader__donut"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+          <div class="pswp__share-tooltip"></div>
+        </div>
+        <button class="pswp__button pswp__button--arrow--left"></button>
+        <button class="pswp__button pswp__button--arrow--right"></button>
+        <div class="pswp__caption">
+          <div class="pswp__caption__center"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

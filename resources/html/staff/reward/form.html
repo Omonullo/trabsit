@@ -1,0 +1,92 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Карта для вознаграждений"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Карта для вознаграждений"|t }} {% endblock %}
+
+{% block floor %}
+    <script>
+      $(function () {
+        $('input[name="card"]').card()
+      })
+    </script>
+
+{% endblock %}
+
+
+{% block floor %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="kt-portlet kt-portlet--height-fluid">
+        <div class="kt-portlet__head">
+            <div class="kt-portlet__head-label">
+                <h3 class="kt-portlet__head-title">{{ "Изменение карты для вознаграждений"|t }}</h3>
+            </div>
+        </div>
+        <div class="kt-portlet__body">
+            <form class="kt-form" method="post">
+                {% csrf-field %}
+                <div class="row justify-content-center">
+                    <div class="col-md-6 col-sm-12 form-group row">
+                        <label class="col-md-3 col-form-label">{{ "Номер карты"|t }}</label>
+                        <div class="col-md-6">
+                            <input type="text" name="card" class="form-control"
+                                   value="{{ staff.card|default:@request.identity.card }}"
+                                   pattern="8600 \d{4} \d{4} \d{4}">
+                            <span class="form-text text-primary"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-sm btn-outline-primary ml-2">
+                                {{ "Сохранить"|t }}
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-sm-12 form-group row">
+                    {{ "<div>Начиная с 25 июля 2021 года инспектора рассматривающие видео в video.yhxbb.uz будут получать вознаграждение</div><ul class=\"mt-2\"><li> за каждое нарушение выявленное самостоятельно</li><li> при случаях когда гражданин отказывается от вознаграждения.</li></ul>"|t }}
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-sm-12 form-group row">
+                    <div class="alert alert-secondary alert-notice alert-light-primary" role="alert">
+                        <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
+                        <div class="alert-text"><p class="mb-0">
+                                {{ "Самостоятельно выявленным нарушением считается нарушение, которое не было добавлено\обнаружено гражданином, а добавлено вами вручную."|t }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-sm-12 form-group row">
+                    <div class="mt-3">
+                        {{ "Вознаграждение будет выплачено автоматически на указанную инспектором пластиковую карту с момента оплаты штрафа нарушителем."|t }}
+                    </div>
+                    <div class="mt-3">
+                        {{ "Для справедливого рассмотрения выбранные виды вознаграждения отправителя видео-нарушения будут скрыты."|t }}
+                    </div>
+                    <div class="mt-3">
+                        {{ "Для самостоятельного добавления нарушения посмотрите это видео"|t }}
+                    </div>
+                    <div class="mt-3">
+                        {{ "Для просмотра отчета вознаграждений пройдите в <a href='/staff/rewards'>Мои вознаграждения</a>"|t }}
+                    </div>
+
+                    <div class="mt-3">
+                        {{ "Для просмотра списка “самостоятельно выявленных нарушений” вы можете пройти на страницу <a href='/staff/offenses?only_my=on' target='_blank'>Правонарушений</a> и поставить птичку на “Найденные мной”"|t }}
+                    </div>
+
+                    <div class="offense__imgs d-flex w-100">
+                        <img src="/img/staff-offenses-uz-cy.png" class="mt-4 w-100" style="height: fit-content" alt="">
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

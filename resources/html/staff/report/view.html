@@ -1,0 +1,545 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Видеозапись"|t }} №{{ report.number }}{% endblock %}
+{% block sub-header-title %}
+{{ "Видеозапись"|t }} №{{ report.number }}
+{% if revision %}
+<span class="badge badge-danger kt-font-sm align-top">v{{revision.version}}</span>
+{% endif %}
+{% endblock %}
+
+{% block floor %}
+  <script>
+    function init_map() {
+      if ($('#map').length) {
+        var center = $('#map').data('center').split(',');
+
+        var map = new ymaps.Map('map', {
+          center: center,
+          zoom: 14,
+          controls: ['typeSelector']
+        });
+
+        var marker = new ymaps.GeoObject(
+          {geometry: {type: "Point", coordinates: center}});
+
+        map.geoObjects.add(marker);
+      }
+    }
+
+    $(function () {
+      $('video').player();
+    })
+  </script>
+{% endblock %}
+
+
+{% block content %}
+  <div class="kt-portlet kt-portlet--tabs">
+    <div class="kt-portlet__head kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ report.status|report-status-color }} pr-0">
+      <div class="kt-portlet__head-toolbar">
+        <ul class="nav nav-tabs nav-tabs-line nav-tabs-line-success">
+          <li class="nav-item">
+            <a class="nav-item nav-link active"
+               id="nav-home-tab"
+               data-toggle="tab"
+               data-tab="video"
+               href="#nav-video">
+              <i class="flaticon2-photo-camera"></i>
+               {% video_title @report.extra_video @report.extra_video_type%}
+
+            </a>
+          </li>
+          {% if report.extra_video %}
+            <li class="nav-item">
+              <a class="nav-item nav-link"
+                 id="nav-profile-tab"
+                 data-toggle="tab"
+                 data-tab="extra-video"
+                 href="#nav-extra-video">
+                <i class="flaticon2-photo-camera"></i>
+                {% if report.extra_video_type %}
+                  {{ report.extra_video_type|t }}
+                {% else %}
+                  {{ "Второе видео"|t }}
+                {% endif %}
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="kt-portlet__head-toolbar align-items-center">
+        <div class="kt-ribbon__target">
+          <span class="kt-ribbon__inner"></span>
+          {{ report.status|report-status-name|t }}
+        </div>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="nav-video">
+          <div class="d-flex flex-column">
+            {% if report.video %}
+              <video crossorigin="anonymous">
+                <source src="{{ report.video.url }}" data-download-url="{{ report.video.download-url }}"
+                        type="{{ report.video.content-type }}">
+              </video>
+            {% else %}
+              <div class="text-center my-5">
+                <i class="flaticon-warning-sign" style="font-size: 5rem"></i>
+                <p>{{ "Данное видео было заархивированно, обратитесь в тех поддержку чтобы получить больше информации"|t }}</p>
+                <a class="btn btn-outline-secondary btn-sm mt-2" href="mailto:salom@kash.uz" onclick="navigator.clipboard.writeText('salom@kash.uz')">salom@kash.uz</a>
+              </div>
+            {% endif %}
+
+          </div>
+        </div>
+        {% if report.extra_video %}
+          <div class="tab-pane fade" id="nav-extra-video">
+            <div class="d-flex flex-column">
+              <video crossorigin="anonymous">
+                <source src="{{ report.extra_video.url }}" data-download-url="{{ report.extra_video.download-url }}"
+                        type="{{ report.extra_video.content-type }}">
+              </video>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet kt-portlet--tabs">
+    <div class="kt-portlet__head">
+      <div class="kt-portlet__head-toolbar">
+        <ul class="nav nav-tabs nav-tabs-line nav-tabs-line-success">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#report-info-content">
+              <i class="flaticon-notes"></i>
+              {{ "Детали"|t }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#citizen-content" id="citizen-tab">
+              <i class="flaticon-user"></i>
+              {{ "Заявитель"|t }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#location-content" id="location-tab">
+              <i class="flaticon-placeholder"></i>
+              {{ "Карта"|t }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#revision-content" id="revision-tab">
+              <i class="flaticon-placeholder"></i>
+              {{ "Журнал рассмотрений"|t }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <div class="tab-content">
+        <div class="tab-pane active" id="report-info-content">
+          <div class="accordion accordion-light" id="offense-accordion">
+            <div class="row">
+              <div class="col-md-6 col-sm-12">
+                <div>
+                 <div class="kt-label-font-color-2">
+                   {{ "Место события"|t }}
+                 </div>
+                  <div>
+                    <a href="#location-content" onclick="$('#location-tab').tab('show')">
+                      {{ report|address }}
+                    </a>
+                  </div>
+                  <div class="mt-3">
+                    <div class="kt-label-font-color-2">{{ "Вознаграждение"|t }}</div>
+                    <div class="kt-label-font-color-3">
+                      {% ifequal request.identity.role "admin" %}
+                        {% if report.offense-rewards %}
+                          {% for reward in report.offense-rewards %}
+                            <div>
+                              <span>{{ reward|reward-icon }}</span>
+                              <span>{{ reward|reward }}</span>
+                            </div>
+                          {% endfor %}
+                        {% else %}
+                          <span>{{ report.reward_params|reward-icon }}</span>
+                          <span>{{ report.reward_params|reward }}</span>
+                        {% endif %}
+                        {% else %}
+                        {% if any report.reward_params.no-reward report.reward_params.fund %}
+                          <span>{{ report.reward_params|reward-icon }}</span>
+                          <span>{{ report.reward_params|reward }}</span>
+                        {% else %}
+                          <span class="kt-label-font-color-1">{{ "Скрыто"|t }}</span>
+                        {% endif %}
+                      {% endifequal %}
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <div class="kt-label-font-color-2">
+                      {{ "Заявитель"|t }}
+                    </div>
+                    <div class="kt-label-font-color-3">
+                      <a href="#citizen-content" onclick="$('#citizen-tab').tab('show')">
+                        {% private %} {{ report.citizen.first_name }} {{ report.citizen.middle_name }} {{ report.citizen.last_name }} {% end-private %}
+                      </a>
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <div class="kt-label-font-color-2">
+                      {{ "Время нарушения"|t }}
+                    </div>
+                    <div class="kt-label-font-color-3">{{ report.incident_time|local-date-time }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div>
+                  <div>
+                   <div class="kt-label-font-color-2">
+                     {{ "Время создания заявки"|t }}
+                   </div>
+                    <div class="kt-label-font-color-3">{{ report.create_time|local-date-time }}</div>
+                  </div>
+                  {% if any report.review_time %}
+                    <div class="mt-3">
+                     <div class="kt-label-font-color-2">
+                       {{ "Время рассмотрения инспектором"|t }}
+                     </div>
+                      <div class="kt-label-font-color-3">{{ report.review_time|local-date-time }}</div>
+                    </div>
+                  {% endif %}
+                  {% if report.inspector %}
+                    <div class="mt-3">
+                      <div class="kt-label-font-color-2">
+                        {{ "Кем рассмотрено"|t }}
+                      </div>
+                      <div class="kt-label-font-color-3">
+                        {{ report.inspector.rank }}
+                        {{ report.inspector.first_name }} {{ report.inspector.middle_name }} {{ report.inspector.last_name }}
+                        {% if report.inspector.public_phone %} ({{ report.inspector.public_phone|phone }}) {% endif %}
+                      </div>
+                    </div>
+                  {% endif %}
+                  {% if report.creator_client_id %}
+                    {% with oauth_client=report.creator_client_id|oauth-client %}
+                      <div class="mt-3">
+                        <div class="kt-label-font-color-2">
+                          {{ "Источник заявки"|t }}
+                        </div>
+                        <div class="kt-label-font-color-3">
+                          <a href="{{ oauth_client.url }}">{{ oauth_client.name }}</a>
+                        </div>
+                      </div>
+                    {% endwith %}
+                  {% endif %}
+                  <div class="mt-3">
+                    <div class="kt-label-font-color-2">
+                      {{ "Другие видеозаписи"|t }}
+                    </div>
+                    <div class="kt-label-font-color-3">
+                      <a href="{% path staff.report/index ? point_radius @report.lat %},{{ report.lng }},0.5" target="_blank">
+                        {{ "В радиусе 500м (%s)"|t:@report.nearby_count }}</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="location-content">
+          <div class="mb-5" style="height: 80vh" id="map" data-center="{{ report.lat }},{{ report.lng }}"></div>
+        </div>
+        <div class="tab-pane" id="citizen-content">
+          <div class="row">
+            <div class="col-md-6">
+             <div class="kt-label-font-color-2">
+               {{ "Полное имя"|t }}
+             </div>
+              <div class="kt-label-font-color-3">{% private %} {{ report.citizen.first_name }} {{ report.citizen.middle_name }} {{ report.citizen.last_name }} {% end-private %}</div>
+              <br>
+             <div class="kt-label-font-color-2">
+               {{ "Номер телефона"|t }}
+             </div>
+              <div class="kt-label-font-color-3">{% private %} {{ report.citizen.phone|phone }} {% end-private %}</div>
+              <br>
+              {% if report.citizen.email %}
+               <div class="kt-label-font-color-2">
+                 {{ "Email адрес"|t }}
+               </div>
+                <div class="kt-label-font-color-3">{% private %} {{ report.citizen.email }} {% end-private %}</div>
+                <br>
+              {% endif %}
+             <div class="kt-label-font-color-2">
+               {{ "Адрес"|t }}
+             </div>
+              <div class="kt-label-font-color-3">{% private %} {{ report.citizen|address }} {% end-private %}</div>
+            </div>
+            <div class="col-md-6">
+             <div class="kt-label-font-color-2">
+               {{ "Зарегистрирован"|t }}
+             </div>
+              <div class="kt-label-font-color-3">{{ report.citizen.create_time|local-date }}</div>
+              <br>
+             <div class="kt-label-font-color-2">
+               {{ "Всего видеозаписей"|t }}
+             </div>
+              <div class="kt-label-font-color-3">
+                <a href="{% path staff.report/index ? citizen_id @report.citizen.id %}">{{ report.citizen.stat.report-count }}</a>
+              </div>
+              <br>
+             <div class="kt-label-font-color-2">
+               {{ "Всего нарушений"|t }}
+             </div>
+              <div class="kt-label-font-color-3">
+                {{ report.citizen.stat.offense-count }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="revision-content">
+          {% with revisions=report.revisions %}
+          {% empty-wrapper revisions %}
+          <table class="table">
+            <thead>
+            <tr>
+              <th>{{ "Версия"|t }}</th>
+              <th>{{ "Статус"|t }}</th>
+              <th>{{ "Актуален до"|t }}</th>
+              <th>{{ "Кем рассмотрено"|t }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for revision in report.revisions %}
+            <tr>
+              <td>
+                <a href="{% path staff.report/view id @report.id ? version @forloop.counter %}">v{{ forloop.counter }}</a>
+              </td>
+              <td>
+                <span class="kt-badge kt-badge--inline kt-badge--{{ revision.data.status|report-status-color }} no-wrap">{{ revision.data.status|report-status-name|t }}</span>
+              </td>
+              <td>{{ revision.invalidate_time|local-date-time }}</td>
+              <td>
+                {% with inspector=revision.data.inspector %}
+                {{ inspector.rank }} {{ inspector.first_name }} {{ inspector.middle_name }} {{ inspector.last_name }}
+                {% endwith %}
+              </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+          {% end-empty-wrapper %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+  {% for offense in report.offenses %}
+    <div class="kt-portlet kt-portlet--head kt-portlet--mobile offense" id="{{ offense.number }}">
+      <div id="{{ offense.id }}" class="kt-portlet__head kt-portlet__head--noborder kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ offense.status|offense-status-color }} pr-0">
+        <div class="kt-portlet__head-label">
+          <h3 class="kt-portlet__head-title">{{ "Нарушение"|t }} №{{ offense.number }}</h3>
+        </div>
+        <div class="kt-portlet__head-toolbar">
+          {% if offense.asbt_log %}
+          <button type="button"
+                  class="btn btn-sm btn-outline-info offense__log__btn"
+                  data-offense-id="{{ offense.id }}"
+                  data-toggle="modal"
+                  data-target=".offense_asbt_log_modal">
+            {{ "Логи отправки"|t }}
+          </button>
+          {% endif %}
+          {% if offense.failure_message %}
+          {% ifequal offense.status "failed" %}
+          <form method="post" action="{% path staff.offense/reforward id @offense.id %}">
+            {% csrf-field %}
+            <button type="submit" class="btn btn-sm btn-outline-danger ml-2">
+            {{ "Отправить повторно"|t }}
+            </button>
+          </form>
+          {% endifequal %}
+          {% endif %}
+          <div class="kt-ribbon__target">
+            <span class="kt-ribbon__inner"></span>
+            {{ offense.status|offense-status-name|t }}
+          </div>
+        </div>
+      </div>
+      <div class="kt-portlet__body kt-portlet__body--fit-top pt-1">
+        <div class="row">
+          <div class="col-lg-6 col-md-12">
+            <div class="kt-font-bold kt-label-font-color-2">
+              {{ "Номер транспорта"|t }}
+            </div>
+            <span class="vehicle_id vehicle_id-sm mt-1">{{ offense.vehicle_id }}</span>
+
+            <div class="mt-3">
+              <div class="kt-font-bold kt-label-font-color-2">{{ "Описание"|t }}</div>
+              {% if offense.testimony %}
+              {{ offense.testimony }}
+              {% else %}
+              {{ "Без описания"|t }}
+              {% endif %}
+            </div>
+
+            <div class="kt-font-bold kt-label-font-color-2">
+              {{ "Тип нарушения"|t }}
+            </div>
+            <span class="mt-1">{{ offense.type_name }}</span>
+
+            {% if any offense.accept_time offense.reject_time %}
+            <div class="mt-3">
+              <div class="kt-font-bold kt-label-font-color-2">{{ "Принятые меры"|t }}</div>
+              {% offense-taken-measures @offense %}
+            </div>
+            {% endif %}
+
+            {% if any offense.vehicle_img offense.vehicle_id_img offense.extra_img %}
+              <div class="mt-3 offense__imgs">
+                <div class="kt-font-bold kt-label-font-color-2">{{ "Изображения"|t }}</div>
+                <div class="d-flex justify-content-start mt-2">
+                  {% if offense.vehicle_img %}
+                  <div class="mb-3">
+                    <img src="{{ offense.vehicle_img }}" alt="">
+                  </div>
+                  {% endif %}
+                  {% if offense.vehicle_id_img %}
+                  <div class="ml-3 mb-3">
+                    <img src="{{ offense.vehicle_id_img }}" alt="">
+                  </div>
+                  {% endif %}
+                  {% if offense.extra_img %}
+                    <div class="ml-3 mb-3">
+                      <img src="{{ offense.extra_img }}" alt="">
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+          <div class="col-lg-6 col-md-12">
+            <div>
+              <strong class=" kt-font-bold kt-label-font-color-2">
+                {{ "Код нарушения"|t }}
+              </strong>
+              <div>
+                {{ offense.id|guid }}
+              </div>
+            </div>
+            {% if offense.forward_time %}
+              <div class="mt-3">
+                <strong class=" kt-font-bold kt-label-font-color-2">
+                  {{ "Дата отправки КСУБД"|t }}
+                </strong>
+                <div class="kt-label-font-color-3">{{ offense.forward_time|local-date-time }}</div>
+              </div>
+            {% endif %}
+            {% if offense.fine_id %}
+              <div class="mt-3">
+                <strong class="kt-font-bold kt-label-font-color-2">
+                  {{ "Номер постановления"|t }}
+                </strong>
+                <div class="kt-label-font-color-3">{{ offense.fine_id }}</div>
+              </div>
+            {% endif %}
+            {% if offense.fine_date %}
+              <div class="mt-3">
+                <strong class="kt-font-bold kt-label-font-color-2">
+                  {{ "Дата постановления"|t }}
+                </strong>
+                <div class="kt-label-font-color-3">{{ offense.fine_date|local-date }}</div>
+              </div>
+            {% endif %}
+            {% if any offense.pay_time offense.dismiss_time %}
+            <div class="mt-3">
+                <div class="mt-3 kt-font-bold kt-label-font-color-2">
+                  {{ "Дата получения ответа от КСУБД о состоянии постановления"|t }}
+                </div>
+                <div class="kt-label-font-color-3">{{ offense.pay_time|local-date-time }}</div>
+                <div class="kt-label-font-color-3">{{ offense.dismiss_time|local-date-time }}</div>
+            </div>
+            {% endif %}
+            {% if offense.creator_staff_id %}
+            <div class="mt-3">
+              <div class="kt-font-bold kt-label-font-color-2">{{ "Создано инспектором"|t }}</div>
+              <div class="kt-label-font-color-3">
+                {{ offense.creator_staff.rank }}
+                {{ offense.creator_staff.first_name }} {{ offense.creator_staff.middle_name }} {{ offense.creator_staff.last_name }}
+                {% if offense.creator_staff.public_phone %} ({{ offense.creator_staff.public_phone|phone }}) {% endif %}
+              </div>
+              </div>
+            {% endif %}
+
+            {% if offense.accept_time %}
+            <div class="mt-3">
+              <div class="kt-font-bold kt-label-font-color-2">{{ "Публичная ссылка"|t }}</div>
+              <a href="{% path asbt/view id @offense.short-id %}" target="_blank">
+                {% path-abs asbt/view id @offense.short-id %}
+              </a>
+            </div>
+            {% endif %}
+            {% if offense.failure_time %}
+            <div class="mt-3">
+              <strong class=" kt-font-bold kt-label-font-color-2">
+                {{ "Время ошибки отправки КСУБД"|t }}
+              </strong>
+              <div class="kt-label-font-color-3">
+                {{ offense.failure_time|local-date-time }}
+              </div>
+            </div>
+            {% endif %}
+            {% if offense.failure_message %}
+            <div class="mt-3">
+              <strong class=" kt-font-bold kt-label-font-color-2">
+                {{ "Ошибка отправки КСУБД"|t }}
+              </strong>
+              <div class="kt-label-font-color-3">
+                {{ offense.failure_message }}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+
+  {% if revision %}{% else %}
+    {% if request.identity.review_allowed %}
+      {% ifequal "inspector" request.identity.role %}
+        <div class="pull-right">
+          <a href="{% path staff.report/review2 id @report.id ? force true next_url @next-url%}" class="btn btn-ment">
+            <i class="la la-refresh mb-1"></i>{{ "Пересмотреть"|t }}
+          </a>
+        </div>
+      {% endifequal %}
+    {% endif %}
+    {% ifequal "admin" request.identity.role %}
+      <div class="pull-right">
+        <a href="{% path staff.report/review2 id @report.id ? force true next_url @next-url%}" class="btn btn-ment">
+          <i class="la la-refresh mb-1"></i>{{ "Пересмотреть"|t }}
+        </a>
+      </div>
+    {% endifequal %}
+  {% endif %}
+
+  <div class="modal fade offense_asbt_log_modal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered" >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ "Логи отправки"|t }}</h5>
+        </div>
+        <div class="modal-body">
+          <code class="offense__log"></code>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

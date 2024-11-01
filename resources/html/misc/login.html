@@ -1,0 +1,247 @@
+{% extends "metronic/base.html" %}
+
+{% block title %}videoJarima - {{ "Сделаем дороги безопасными вместе"|t }}{% endblock %}
+
+{% block roof %}
+<link rel="stylesheet" href="/css/login.css">
+{% endblock %}
+
+{% block floor %}
+  {% if staff %}
+    <script src="/js/staff_login.js" type="module"></script>
+  {% else %}
+    <script src="/js/login.js" type="module"></script>
+  {% endif %}
+{% endblock %}
+
+{% block page %}
+<div class="container-fluid flex-grow-1 d-flex flex-column">
+  <div class="row flex-grow-1 justify-content-center">
+    {% if not staff %}
+    <div class="col-md-7 login__wall text-white d-flex flex-column justify-content-center">
+      <div>
+        <div class="row justify-content-center">
+          <div class="col-md-6 text-center">
+            <div class="counter">
+              <em data-countup="{{ citizen-count }}">0</em>
+              <label>{{ "Количество пользователей"|t }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="counter">
+              <em data-countup="{{ offense-count }}">0</em>
+              <label>{{ "Количество правонарушений"|t }}</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="counter">
+              <em data-countup="{{ reject-count }}">0</em>
+              <label>{{ "Количество отклонённых правонарушений"|t }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="counter">
+              <em data-countup="{{ fine-sum }}" data-decimal-places="2">0</em>
+              <label>{{ "Сумма штрафов (млрд сум)"|t }}</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="counter">
+              <em data-countup="{{ reward-sum }}" data-decimal-places="2">0</em>
+              <label>{{ "Сумма вознаграждений (млрд сум)"|t }}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <div class="{% if staff %} col-md-12 {% else %} col-md-5 {% endif %} bg-white d-flex flex-column align-items-center justify-content-center">
+      <a id="faq" href="{% path misc/faq %}">
+        {{ "Вопросы"|t }}
+      </a>
+
+      <a id="search" href="{% path misc/search %}">
+        {{ "Поиск"|t }}
+      </a>
+
+      <a id="facebook" href="https://www.facebook.com/yhxbb.uz" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
+          <path fill="#3F51B5" d="M19 0H5a5 5 0 0 0-5 5v14a5 5 0 0 0 5 5h14a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5zm-3 7h-1.924C13.461 7 13 7.252 13 7.889V9h3l-.238 3H13v8h-3v-8H8V9h2V7.077C10 5.055 11.064 4 13.461 4H16v3z"/>
+        </svg>
+      </a>
+      <a id="telegram" href="https://t.me/yhxbb_uz " target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" height="22" width="22">
+          <defs>
+            <linearGradient id="a" x1=".667" x2=".417" y1=".167" y2=".75">
+              <stop offset="0" stop-color="#37aee2"/>
+              <stop offset="1" stop-color="#1e96c8"/>
+            </linearGradient>
+            <linearGradient id="b" x1=".66" x2=".851" y1=".437" y2=".802">
+              <stop offset="0" stop-color="#eff7fc"/>
+              <stop offset="1" stop-color="#fff"/>
+            </linearGradient>
+          </defs>
+          <circle cx="120" cy="120" r="120" fill="url(#a)"/>
+          <path fill="#c8daea" d="M98 175c-3.888 0-3.227-1.468-4.568-5.17L82 132.207 170 80"/>
+          <path fill="#a9c9dd" d="M98 175c3 0 4.325-1.372 6-3l16-15.558-19.958-12.035"/>
+          <path fill="url(#b)"
+                d="M100.04 144.41l48.36 35.729c5.519 3.045 9.501 1.468 10.876-5.123l19.685-92.763c2.015-8.08-3.08-11.746-8.36-9.349l-115.59 44.571c-7.89 3.165-7.843 7.567-1.438 9.528l29.663 9.259 68.673-43.325c3.242-1.966 6.218-.91 3.776 1.258"/>
+        </svg>
+      </a>
+
+      <div class="kt-header__topbar kt-grid__item">
+        {% language-bar %}
+      </div>
+      <div class="login__form">
+        <div class="login__logo">
+          <a href="/login">
+            <img src="/img/logo.svg" width="160">
+          </a>
+        </div>
+
+        <form class="kt-form" action="/staff" method="post">
+          {% csrf-field %}
+          <h3 class="login__title">
+            videoJarima
+            {% if staff %}
+              <small>{{ "Вход для сотрудников"|t }}</small>
+            {% else %}
+              <small>{{ "Сделаем дороги безопасными вместе"|t }}</small>
+            {% endif %}
+          </h3>
+
+          {% if staff %}
+            <div class="form-group">
+              <div class="d-flex align-items-center">
+                <div class="kt-input-icon kt-input-icon--left kt-input-icon--right">
+                  <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                    <span><i class="la la-user"></i></span>
+                  </span>
+                  <input class="form-control" type="text" name="username" placeholder="{{ "Имя пользователя"|t }}" required autocomplete="false">
+                  <div class="invalid-feedback"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="kt-input-icon kt-input-icon--left">
+                <input class="form-control" type="password" name="password" placeholder="{{ "Пароль"|t }}" required>
+                <div class="invalid-feedback"></div>
+                <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                    <span><i class="la la-lock"></i></span>
+                  </span>
+              </div>
+            </div>
+
+            <div class="collapse code_form">
+              <div class="form-group">
+                <div class="kt-input-icon kt-input-icon--left">
+                <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                  <span><i class="la la-envelope"></i></span>
+                </span>
+                  <input class="form-control" type="number" name="code" placeholder="{{ "Введите код подтверждения"|t }}" required>
+                  <div class="invalid-feedback"></div>
+                </div>
+                <span class="form-text text-muted"></span>
+                <button id="resend" disabled class="btn btn-hover-info btn-block" type="button"></button>
+              </div>
+            </div>
+
+            <div class="mt-4 submit-button">
+              <button class="btn btn-primary btn-block">{{ "Авторизоваться"|t }}</button>
+            </div>
+          {% else %}
+            <div class="form-group">
+              <div class="d-flex align-items-center">
+                <div class="kt-input-icon kt-input-icon--left kt-input-icon--right">
+                  <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                    <span><i class="la la-phone"></i></span>
+                  </span>
+                  <input class="form-control" type="tel" name="phone" placeholder="{{ "Введите номер телефона"|t }}" required autocomplete="false">
+                  <div class="invalid-feedback"></div>
+                </div>
+              </div>
+              <span class="form-text text-muted">{{ "На указанный номер будет отправлен SMS с кодом подтверждения."|t }}</span>
+            </div>
+            <div class="collapse code_form">
+              <div class="form-group">
+                <div class="kt-input-icon kt-input-icon--left">
+                  <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                    <span><i class="la la-envelope"></i></span>
+                  </span>
+                  <input class="form-control" type="number" name="code" placeholder="{{ "Введите код подтверждения"|t }}" required>
+                  <div class="invalid-feedback"></div>
+                </div>
+                <span class="form-text text-muted"></span>
+                <button id="resend" disabled class="btn btn-hover-info btn-block" type="button"></button>
+              </div>
+            </div>
+            <div class="collapse password_form">
+              <div class="form-group">
+                <div class="kt-input-icon kt-input-icon--left">
+                  <input class="form-control" type="password" name="password" placeholder="{{ "Пароль"|t }}" required>
+                  <div class="invalid-feedback"></div>
+                  <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                    <span><i class="la la-lock"></i></span>
+                  </span>
+                </div>
+              </div>
+              <div class="mt-4">
+                <button type="submit" class="btn btn-primary btn-block">{{ "Авторизоваться"|t }}</button>
+              </div>
+              <div class="mt-4 text-center">
+                <a href="{% path misc/change-password %}">Забыли пароль?</a>
+              </div>
+            </div>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+  {% if not staff %}
+  <div class="row py-4">
+    <div class="col-md-3 login__hint">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.1667 4.6665H5.83333C4.54467 4.6665 3.5 5.71117 3.5 6.99984V23.3332C3.5 24.6218 4.54467 25.6665 5.83333 25.6665H22.1667C23.4553 25.6665 24.5 24.6218 24.5 23.3332V6.99984C24.5 5.71117 23.4553 4.6665 22.1667 4.6665Z"
+              stroke="#202121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18.666 2.3335V7.00016" stroke="#202121" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round"/>
+        <path d="M9.33398 2.3335V7.00016" stroke="#202121" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round"/>
+        <path d="M3.5 11.6665H24.5" stroke="#202121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M14.4313 22.1098C13.7786 22.1098 13.2249 22.0071 12.7703 21.8018C12.3229 21.5965 11.9856 21.3398 11.7583 21.0318C11.5383 20.7165 11.4209 20.3938 11.4062 20.0638C11.4062 19.9978 11.4283 19.9428 11.4723 19.8988C11.5163 19.8548 11.5713 19.8328 11.6373 19.8328H12.6493C12.8106 19.8328 12.9206 19.9061 12.9792 20.0528C13.1406 20.5735 13.6246 20.8338 14.4313 20.8338C14.8786 20.8338 15.2269 20.7311 15.4763 20.5258C15.7329 20.3205 15.8613 20.0271 15.8613 19.6458C15.8613 19.2645 15.7439 18.9895 15.5093 18.8208C15.2819 18.6448 14.9446 18.5568 14.4973 18.5568H13.3642C13.2909 18.5568 13.2286 18.5311 13.1773 18.4798C13.1259 18.4285 13.1003 18.3661 13.1003 18.2928V17.8198C13.1003 17.6805 13.1479 17.5705 13.2433 17.4898L15.2013 15.5758H12.0663C11.9856 15.5758 11.9196 15.5501 11.8683 15.4988C11.8169 15.4475 11.7913 15.3851 11.7913 15.3118V14.5748C11.7913 14.4941 11.8169 14.4281 11.8683 14.3768C11.9196 14.3255 11.9856 14.2998 12.0663 14.2998H16.7962C16.8769 14.2998 16.9429 14.3255 16.9943 14.3768C17.0456 14.4281 17.0713 14.4941 17.0713 14.5748V15.2458C17.0713 15.3705 17.0236 15.4731 16.9283 15.5538L15.0363 17.5008L15.1683 17.5118C15.8723 17.5705 16.4296 17.7831 16.8403 18.1498C17.2582 18.5165 17.4672 19.0408 17.4672 19.7228C17.4672 20.2068 17.3352 20.6285 17.0713 20.9878C16.8146 21.3471 16.4553 21.6258 15.9933 21.8238C15.5386 22.0145 15.0179 22.1098 14.4313 22.1098Z"
+              fill="#202121"/>
+      </svg>
+      {{ "Видеозаписи принимаются не позднее 3-х дней со дня фиксации нарушения"|t }}
+    </div>
+    <div class="col-md-3 login__hint pl-4">
+      <div class="d-flex">
+        <img src="/img/trash.webp" width="36" height="36" alt="Littering icon">
+        <div class="ml-2">{{ "С начала 2021 года принимаются видеозаписи с выбросом мусора из автомобиля"|t }}</div>
+      </div>
+    </div>
+    <div class="col-md-3 login__hint">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M26.8327 8.1665L18.666 13.9998L26.8327 19.8332V8.1665Z" stroke="#202121" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M16.3327 5.8335H3.49935C2.21068 5.8335 1.16602 6.87817 1.16602 8.16683V19.8335C1.16602 21.1222 2.21068 22.1668 3.49935 22.1668H16.3327C17.6213 22.1668 18.666 21.1222 18.666 19.8335V8.16683C18.666 6.87817 17.6213 5.8335 16.3327 5.8335Z"
+              stroke="#202121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ "Видеозаписи принимаются продолжительностью не более 120 секунд"|t }}
+    </div>
+    <div class="col-md-3 login__hint">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14.0007 25.6668C20.444 25.6668 25.6673 20.4435 25.6673 14.0002C25.6673 7.55684 20.444 2.3335 14.0007 2.3335C7.55733 2.3335 2.33398 7.55684 2.33398 14.0002C2.33398 20.4435 7.55733 25.6668 14.0007 25.6668Z" stroke="#202121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M14 7V14L18.6667 16.3333" stroke="#202121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ "На видеозаписи должны присутствовать дата и время, включая секунды"|t }}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

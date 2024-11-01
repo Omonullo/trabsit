@@ -1,0 +1,28 @@
+{:session-expire-secs 1200
+ :payment             {:phone {"90" {:service_id 2 :client_field :phone_number}
+                               "91" {:service_id 2 :client_field :phone_number}
+                               "93" {:service_id 104 :client_field :clientid}
+                               "94" {:service_id 104 :client_field :clientid}
+                               "95" {:service_id 8949 :client_field :clientid}
+                               "97" {:service_id 4386 :client_field :clientid}
+                               "98" {:service_id 64 :client_field :phone_number}
+                               "99" {:service_id 4986 :client_field :clientid}}
+                       :fund  {"Возможно всё"      {:service_id   10593
+                                                    :sender_field :client_id
+                                                    :url          "https://t.me/vozmojnovsyo"}
+                               "Эзгу Aмал"         {:service_id   34630
+                                                    :sender_field :user_id
+                                                    :url          "https://ezguamal.org/"}
+                               "Меҳрли қўллар"     {:service_id   8329
+                                                    :sender_field :user_data
+                                                    :url          "http://mehrli.uz"}
+                               "Вақф - \"Вақф\""   {:service_id   9689
+                                                    :sender_field :user_id
+                                                    :url          "http://vaqf.uz"}
+                               "Вақф - \"Хайрия\"" {:service_id   9688
+                                                    :sender_field :user_id
+                                                    :url          "http://vaqf.uz"}}}
+ :daily-area-limit    50
+ :restricted-area-id  "811a6aa2-2446-4abc-b91a-7c8b61310721"
+ :maintenance         {:from "21.05.2021 11:30" :to "28.05.2021 11:30"}
+ :test-url            "http://localhost:3000"}

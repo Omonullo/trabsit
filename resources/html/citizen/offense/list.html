@@ -1,0 +1,151 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Правонарушения"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Правонарушения"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "Список правонарушений"|t }} {% endblock %}
+
+{% block content %}
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {{ "Правонарушения"|t }}
+        </h3>
+      </div>
+      <div class="kt-portlet__head-toolbar">
+        {% ifequal request.identity.role "admin" %}
+        <form method="post" class="mr-2">
+          {% csrf-field %}
+          <button type="submit" class="btn btn-sm btn-label-dark ml-2">
+            {{ "Экспорт в excel"|t }}
+          </button>
+        </form>
+        {% endifequal %}
+
+        <a href="#" class="btn btn-label-brand btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+          {% ifequal "create_time_asc" request.parameters.query.sort %}
+          {{ "Сначала старые"|t }}
+          {% else %}{% ifequal "create_time_desc" request.parameters.query.sort %}
+          {{ "Сначала новые"|t }}
+          {% endifequal %}{% endifequal %}
+        </a>
+        <div class="dropdown-menu dropdown-menu-fit dropdown-menu-right" x-placement="top-end">
+          <ul class="kt-nav">
+            <li class="kt-nav__head">{{ "Сортировка по дате"|t }}</li>
+            <li class="kt-nav__separator my-2"></li>
+            <li class="kt-nav__item {% ifequal "create_time_asc" request.parameters.query.sort %} kt-nav__item--active {% endifequal %}">
+            <a href="?{% query-string sort create_time_asc page nil %}" class="kt-nav__link">
+              <i class="kt-nav__link-icon la la-sort-alpha-asc"></i>
+              <span class="kt-nav__link-text">{{ "Сначала старые"|t }}</span>
+            </a>
+            </li>
+            <li class="kt-nav__item {% ifequal "create_time_desc" request.parameters.query.sort %} kt-nav__item--active {% endifequal %}">
+            <a href="?{% query-string sort create_time_desc page nil %}" class="kt-nav__link">
+              <i class="kt-nav__link-icon la la-sort-alpha-desc"></i>
+              <span class="kt-nav__link-text">{{ "Сначала новые"|t }}</span>
+            </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <form class="kt-form kt-form--label-right kt-margin-t-10 kt-margin-b-20">
+        <input type="hidden" name="sort" value="{{ request.parameters.query.sort }}">
+
+        <div class="form-row align-items-center mb-3">
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Город или область"|t }}</label>
+            {% area-select area_id false @request.parameters.query.area_id true %}
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">№ нарушения</label >
+            <input type="text" class="form-control" name="number" value="{{ request.parameters.query.number }}"/>
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter" for="create_time">{{ "Дата создания"|t }}</label>
+            <input type="text"
+                   id="create_time"
+                   name="create_time"
+                   class="form-control"
+                   autocomplete="off"
+                   value="{{ request.parameters.query.create_time|open-right-date-range }}">
+          </div>
+          <div class="form-group col-md-6 col-sm-12 col-lg-3 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Статус"|t }}</label>
+            <select class="form-control" name="status">
+              <option value=""></option>
+              {% for status in statuses %}
+                <option value="{{ status }}" {% ifequal status request.parameters.query.status %} selected {% endifequal %}>{{ status|offense-status-name|t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-4 px-3">
+            <button class="btn btn-outline-secondary">{{ "Поиск"|t }}</button>
+            <a href="?" class="btn btn-link">{{ "Сброс фильтра"|t }}</a>
+          </div>
+          <div class="col-md-6 col-sm-12 col-lg-8 px-3 text-right">
+            {{ "Количество"|t}} {{ count }}.
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="kt-portlet__body overflow-auto pt-0">
+      {% empty-wrapper paged-rows %}
+      <table class="table" style="min-width: 850px;">
+        <thead>
+        <tr>
+          <th>№</th>
+          <th>{{ "Фото"|t }}</th>
+          <th>{{ "Адрес"|t }}</th>
+          <th>{{ "Нарушители"|t }}</th>
+          <th>{{ "Дата нарушения / создания"|t }}</th>
+          <th class="text-right">{{ "Статус"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for offense in paged-rows %}
+        <tr>
+          <td style="vertical-align: middle">{{ offense.number }}</td>
+          <td>
+            {% if offense.report.thumbnail %}
+            <img class="report__thumbnail mr-4" src="{{ offense.report.thumbnail }}">
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex flex-row align-items-center">
+              <a href="{% path citizen.report/view id @offense.report.id %}#{{ offense.number }}">
+                <div class="flex-grow-1">
+                  <i class="la la-map kt-font-danger"></i>
+                  {{ offense.report|address:true:true|linebreaks-br|safe }}
+                </div>
+              </a>
+            </div>
+          </td>
+          <td class="align-middle">
+            <span class="vehicle_id vehicle_id-sm">{{ offense.vehicle_id }}</span>
+          </td>
+          <td class="align-middle">
+            <div title='{{ "Время нарушения"|t }}'>{{ offense.report.incident_time|local-date-time }}</div>
+            <div title='{{ "Дата создания"|t }}'>{{ offense.report.create_time|local-date-time }}</div>
+          </td>
+          <td class="align-middle text-right">
+            <span class="kt-badge kt-badge--inline kt-badge--{{ offense.status|offense-status-color }} no-wrap"
+            {% if offense.failure_message %}
+            title="{{ offense.failure_message }}"
+            {% endif %}
+            >{{ offense.status|offense-status-name|t }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+      {% pager @total-pages @current-page @request.query-params %}
+      {% end-empty-wrapper %}
+    </div>
+  </div>
+
+{% endblock %}

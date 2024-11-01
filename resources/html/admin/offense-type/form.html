@@ -1,0 +1,104 @@
+{% extends "metronic/index.html" %}
+
+
+{% block title %}{% if not creation %}{{ "Тип нарушения"|t }} №{{ offense-type.id }}{% else %}{{ "Новый тип нарушения"|t }}{% endif %}{% endblock %}
+{% block sub-header-title %}{% if not creation %}{{ "Тип нарушения"|t }} №{{ offense-type.id }}{% else %}{{ "Новый тип нарушения"|t }}{% endif %}{% endblock %}
+{% block sub-header-sub-title %}{% if not creation %}{{ "Редактирование типа нарушений"|t }}{% else %}{{ "Создание типа нарушений"|t }}{% endif %}{% endblock %}
+
+{% block floor %}
+<script>
+  $(function() {
+    $('input[name=factor]').each(function (_, el) {
+      new IMask(el, {
+        mask: Number,
+          scale: 2,
+          signed: false,
+          thousandsSeparator: ' ',
+          radix: '.',
+          mapToRadix: [','],
+          min: 0
+      })
+    })
+  })
+</script>
+{% endblock %}
+
+{% block content %}
+  <div class="kt-portlet kt-portlet--height-fluid">
+    <div class="kt-portlet__head">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {% if not creation %}
+            {{ "Тип нарушения"|t }} №{{ offense-type.id }}
+          {% else %}
+            {{ "Новый тип нарушения"|t }}
+          {% endif %}</h3>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <form class="kt-form pt-4 pb-4" method="post">
+        {% csrf-field %}
+        <div class="row">
+          <div class="col-lg-2"></div>
+          <div class="col-lg-8">
+            {% if new %}
+              <input type="hidden" name="id" value="{{ offense-type.id }}">
+            {% endif %}
+            <div class="form-group row">
+              <label class="col-md-3 col-form-label">
+                {{ "Текст"|t }}
+                <span class="kt-font-success"> ru </span>
+              </label>
+              <div class="col-md-9">
+                <textarea class="form-control" rows="5" required name="name_ru">{{ offense-type.name_ru }}</textarea>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-md-3 col-form-label">
+                {{ "Текст"|t }}
+                <span class="kt-font-success"> uz </span>
+              </label>
+              <div class="col-md-9">
+                <textarea class="form-control" rows="5" required name="name_uz_la">{{ offense-type.name_uz_la }}</textarea>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-md-3 col-form-label">
+                {{ "Текст"|t }}
+                <span class="kt-font-success"> ўз</span>
+              </label>
+              <div class="col-md-9">
+                <textarea class="form-control" rows="5" required name="name_uz_cy">{{ offense-type.name_uz_cy }}</textarea>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-3">{{ "Доп. информация обязателена?"|t }}</div>
+              <div class="col-sm-9">
+                <div class="form-check">
+                  <input class="form-check-input"
+                         type="checkbox"
+                         name="show_details"
+                          {% if offense-type.show_details %}
+                  checked
+                          {% endif %}>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3"></div>
+              <div class="col-md-9">
+                <button type="submit" class="btn btn-success mr-2">
+                  {{ "Сохранить"|t }}
+                </button>
+                <button type="reset" class="btn btn-secondary" onclick="history.go(-1)">
+                  {{ "Назад"|t }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-2"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

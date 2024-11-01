@@ -1,0 +1,209 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Редактирование пользователя"|t }}{% endblock %}
+{% block sub-header-title %}{{ "Редактирование пользователя"|t }}{% endblock %}
+{% block sub-header-sub-title %}{{ citizen.first_name }} {{ citizen.middle_name }} {{ citizen.last_name }}{% endblock %}
+{% block roof %}
+  <style>
+    .tooltip-inner {
+      max-width: fit-content;
+    }
+
+    .is-invalid > .invalid-feedback {
+      display: block;
+    }
+  </style>
+{% endblock %}
+{% block floor %}
+  <script src="/js/citizen_form.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet kt-portlet--height-fluid">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">{% if citizen.id %}{{ citizen.first_name }} {{ citizen.middle_name }} {{ citizen.last_name }}{% else %}Новый пользователь{% endif %}</h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form pt-4 pb-4" method="post">
+      {% csrf-field %}
+      <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+          <div class="kt-section kt-section--first">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Системные данные"|t }}</h3>
+
+              <div id="staff-region">
+                <div class="form-group row">
+                  <label class="col-md-3 col-form-label">{{ "Город или область"|t }}</label>
+                  <div class="col-md-9">
+                    {% area-select area_id false @citizen.area_id %}
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 col-form-label">{{ "Район"|t }}</label>
+                  <div class="col-md-9">
+                    {% district-select district_id false @citizen.district_id %}
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Номер телефона"|t }}</label>
+                <div class="col-md-9">
+                  <input type="text" class="form-control {% if errors.phone %}is-invalid{% endif %}"
+                         value="{% if form.phone %}{{ form.phone }}{% else %}{{ citizen.phone }}{% endif %}"
+                         name="phone" required/>
+                  <div class="invalid-feedback">{% if errors.phone %}{{ errors.phone|join-errors }}{% endif %}</div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Новый пароль"|t }}</label>
+                <div class="input-group col-md-9 {% if errors.new_password %}is-invalid{% endif %}">
+                  <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <div class="checkbox checkbox-inline">
+                      <input data-toggle="checkbox_confirm"
+                             type="checkbox"
+                             data-uncheck-message="{{ "Будет установлен вход через смс"|t }}"
+                             data-check-message="{{ "Новый пароль будет отправлен по смс"|t }}"
+                             name="has_password"
+                             {% if any form.has_password citizen.password %} checked {% endif %} >
+                      <span></span>
+                    </div>
+                  </span>
+                  </div>
+                  <input type="text" class="form-control"
+                         name="new_password"
+                         placeholder="{{ "Новый пароль"|t }}"
+                          {% if not any form.has_password citizen.password %} disabled {% endif %}
+                         value="{{ form.new_password }}">
+                  <div class="input-group-append">
+                    <button type="button"
+                            {% if not any form.has_password citizen.password %} disabled {% endif %}
+                            class="btn btn-outline-primary generate-password-btn">
+                      {{ "Сгенерировать"|t }}
+                    </button>
+                  </div>
+                  <div class="invalid-feedback">{% if errors.new_password %}{{ errors.new_password|join-errors }}{% endif %}</div>
+                </div>
+              </div>
+              <div id="citizen-upload-forbidden" class="form-group row">
+                <div class="col-md-3">{{ "Запретить загрузку видео"|t }}</div>
+                <div class="col-sm-9">
+                  <label class="kt-checkbox kt-checkbox--danger mb-4">
+                    <input class="form-check-input" type="checkbox"
+                           name="upload_forbidden" {% if any form.upload_forbidden citizen.upload_forbidden %} checked {% endif %}>
+                    <span></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="kt-section">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Личные данные"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Имя"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control {% if errors.first_name %}is-invalid{% endif %}"
+                         type="text"
+                         name="first_name"
+                         minlength="3"
+                         maxlength="32"
+                         value="{% if form.first_name %}{{ form.first_name }}{% else %}{{ citizen.first_name }}{% endif %}"
+                         required>
+                  <div class="invalid-feedback">{% if errors.first_name %}{{ errors.first_name|join-errors }}{% endif %}</div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Фамилия"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control {% if errors.last_name %}is-invalid{% endif %}"
+                         type="text"
+                         name="last_name"
+                         minlength="3"
+                         maxlength="32"
+                         value="{% if form.last_name %}{{ form.last_name }}{% else %}{{ citizen.last_name }}{% endif %}"
+                         required>
+                  <div class="invalid-feedback">{% if errors.last_name %}{{ errors.last_name|join-errors }}{% endif %}</div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Отчество"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control {% if errors.middle_name %}is-invalid{% endif %}"
+                         type="text"
+                         name="middle_name"
+                         minlength="3"
+                         maxlength="32"
+                         value="{% if form.middle_name %}{{ form.middle_name }}{% else %}{{ citizen.middle_name }}{% endif %}"
+                         required>
+                  <div class="invalid-feedback">{% if errors.middle_name %}{{ errors.middle_name|join-errors }}{% endif %}</div>
+
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Email"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control {% if errors.email %}is-invalid{% endif %}"
+                         type="text"
+                         name="email"
+                         value="{% if form.email %}{{ form.email }}{% else %}{{ citizen.email }}{% endif %}"
+                         required>
+                  <div class="invalid-feedback">{% if errors.email %}{{ errors.email|join-errors }}{% endif %}</div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Доп. номер телефона"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input type="tel"
+                         name="second_phone"
+                         class="form-control"
+                         value="{% if form.second_phone %}{{ form.second_phone }}{% else %}{{ citizen.second_phone }}{% endif %}"
+                         pattern="\+998 \d{2} \d{3} \d{2} \d{2}">
+                  <div class="invalid-feedback">{% if errors.second_phone %}{{ errors.second_phone|join-errors }}{% endif %}</div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Поселок/Массив/Улица/Дом"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="address"
+                         value="{% if form.address %}{{ form.address }}{% else %}{{ citizen.address }}{% endif %}">
+                  <div class="invalid-feedback">{% if errors.address %}{{ errors.address|join-errors }}{% endif %}</div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Почтовый индекс"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control"
+                         type="text"
+                         name="zipcode"
+                         value="{% if form.zipcode %}{{ form.zipcode }}{% else %}{{ citizen.zipcode }}{% endif %}"
+                         maxlength="6">
+                  <div class="invalid-feedback">{% if errors.zipcode %}{{ errors.zipcode|join-errors }}{% endif %}</div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-9">
+                  <button type="submit" class="btn btn-success mr-2">{{ "Сохранить"|t }}</button>
+                  <button type="reset" class="btn btn-secondary" onclick="history.go(-1)">{{ "Назад"|t }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2"></div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

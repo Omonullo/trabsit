@@ -1,0 +1,336 @@
+{% extends "metronic/index.html" %}
+
+
+{% block title %}{% if not creation %}{{ "Клиент"|t }} {{ client.name }}{% else %}{{ "Новый клиент"|t }}{% endif %}{% endblock %}
+{% block sub-header-title %}{% if not creation %}{{ "Клиент"|t }} {{ client.name }}{% else %}{{ "Новый клиент"|t }}{% endif %}{% endblock %}
+{% block sub-header-sub-title %}{% if not creation %}{{ "Редактирование клиента"|t }}{% else %}{{ "Создание клиента"|t }}{% endif %}{% endblock %}
+{% block roof %}
+{% endblock %}
+
+
+{% block floor %}
+  <script src="/npm/bootstrap-maxlength/bootstrap-maxlength.min.js" type="text/javascript"></script>
+  <script src="/js/client_form.js" type="module"></script>
+
+{% endblock %}
+
+
+{% block content %}
+  <div class="kt-portlet kt-portlet--height-fluid">
+    <div class="kt-portlet__head">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {% if not creation %}
+            {{ "Клиент"|t }} {{ client.name }}
+          {% else %}
+            {{ "Новый клиент"|t }}
+          {% endif %}</h3>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <form class="kt-form pt-4 pb-4" method="post" id="client_form">
+        {% csrf-field %}
+        <div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Клиент ID"|t }}</label>
+            <div class="col-md-9">
+              <div class="input-group">
+                <input type="text" class="form-control {% if errors.id %} is-invalid {% endif %}" name="id"
+                       value="{{ client.id }}" step="1">
+                <div class="input-group-append">
+                  <button class="btn btn-secondary btn-elevate" id="client_id__refresh" type="button">
+                    <i class="la la-refresh"></i>
+                  </button>
+                </div>
+                <div class="invalid-feedback"> {{ errors.id|join-errors }} </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Секретный ключ клиента"|t }}</label>
+            <div class="col-md-9">
+              <input type="text"
+                     step="2"
+                     class="form-control {% if errors.secret %} is-invalid {% endif %}"
+                     name="secret" value="{{ client.secret }}"
+                     maxlength="32">
+              <div class="invalid-feedback">
+                {{ errors.secret|join-errors }}
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Название"|t }}</label>
+            <div class="col-md-9">
+              <input type="text" class="form-control {% if errors.name %} is-invalid {% endif %}"
+                     name="name" value="{{ client.name }}" required>
+              <div class="invalid-feedback"> {{ errors.name|join-errors }}</div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3 py-2">{{ "Включен?"|t }}</div>
+            <div class="col-sm-9">
+                <span class="kt-switch kt-switch--icon">
+                  <label>
+                    <input type="checkbox" name="enabled" {% if client.enabled %}checked{% endif %}>
+                    <span></span>
+                  </label>
+                </span>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3 py-2">{{ "Транскодировать?"|t }}</div>
+            <div class="col-sm-9">
+                <span class="kt-switch kt-switch--icon">
+                  <label>
+                    <input type="checkbox" name="encoding_required" {% if client.encoding_required %}checked{% endif %}>
+                    <span></span>
+                  </label>
+                </span>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Webhook Login"|t }}</label>
+            <div class="col-md-9">
+              <input type="text" class="form-control {% if errors.webhook_login %} is-invalid {% endif %}"
+                     name="webhook_login" value="{{ client.webhook_login }}">
+              <div class="invalid-feedback"> {{ errors.webhook_login|join-errors }}</div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Webhook Password"|t }}</label>
+            <div class="col-md-9">
+              <input type="password" class="form-control {% if errors.webhook_password %} is-invalid {% endif %}"
+                     name="webhook_password" value="{{ client.webhook_password }}">
+              <div class="invalid-feedback"> {{ errors.webhook_password|join-errors }}</div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Webhook завяки"|t }}</label>
+            <div class="col-md-9">
+              <input type="url" class="form-control {% if errors.report_status_webhook %} is-invalid {% endif %}"
+                     name="report_status_webhook" value="{{ client.report_status_webhook }}">
+              <div class="invalid-feedback"> {{ errors.report_status_webhook|join-errors }}</div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Webhook нарушения"|t }}</label>
+            <div class="col-md-9">
+              <input type="url" class="form-control {% if errors.offense_status_webhook %} is-invalid {% endif %}"
+                     name="offense_status_webhook" value="{{ client.offense_status_webhook }}">
+              <div class="invalid-feedback"> {{ errors.offense_status_webhook|join-errors }}</div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3 py-2">{{ "Тип гранта"|t }}</div>
+            <div class="col-sm-9">
+              <select class="form-control" name="grant_type" required>
+                <option value="">{{ "Выберите тип"|t }}</option>
+                {% for id, grant in grant_types %}
+                  {% if not grant.hidden %}
+                    <option
+                            value="{{ id }}" {% ifequal id client.grant_type %} selected {% endifequal %}>{{ grant.name }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div data-grant-type="code">
+            <div class="form-group row">
+              <label class="col-md-3 col-form-label">{{ "Клиентская ссылка"|t }}</label>
+              <div class="col-md-9">
+                <input type="url"
+                       step="3"
+                       class="form-control {% if errors.url %} is-invalid {% endif %}"
+                       name="url" value="{{ client.url }}"
+                       required
+                       maxlength="255">
+                <div class="invalid-feedback">
+                  {{ errors.url|join-errors }}
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-md-3 col-form-label">{{ "Перенаправление ошибки"|t }}</label>
+              <div class="col-md-9">
+                <input type="text"
+                       step="4"
+                       class="form-control {% if errors.error_redirect_uri %} is-invalid {% endif %}"
+                       name="error_redirect_uri" value="{{ client.error_redirect_uri }}"
+                       required
+                       maxlength="255">
+                <div class="invalid-feedback">
+                  {{ errors.error_redirect_uri|join-errors }}
+                </div>
+              </div>
+            </div>
+            <div id="redirect_uris">
+              <div data-repeater-list>
+                {% if client.redirect_uri|count-is:0 %}
+                  <div class="form-group row" data-repeater-item>
+                    <div class="col-md-3 col-form-label">
+                      <label>{{ "Перенаправления"|t }}</label>
+                    </div>
+                    <div class="col-md-8">
+                      <input type="text"
+                             step="4"
+                             class="form-control {% if errors.redirect_uri %} is-invalid {% endif %}"
+                             value=""
+                             maxlength="255">
+                      <div class="invalid-feedback">
+                        {{ errors.redirect_uri|join-errors }}
+                      </div>
+                    </div>
+                    <div class="col-md-1" data-repeater-create>
+                      <button type="button" class="btn btn-outline-brand btn-sm btn-icon btn-circle">
+                        <i class="la la-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                {% endif %}
+                {% for uri in client.redirect_uri %}
+                  <div class="form-group row" data-repeater-item>
+                    <div class="col-md-3 col-form-label">
+                      {% if forloop.first %}
+                        <label>{{ "Перенаправления"|t }}</label>
+                      {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                      <input type="text"
+                             step="{{ forloop.counter|add:4 }}"
+                             class="form-control {% if errors.redirect_uri %} is-invalid {% endif %}"
+                             value="{{ uri }}"
+                             maxlength="255">
+                      <div class="invalid-feedback">
+                        {{ errors.redirect_uri|join-errors }}
+                      </div>
+                    </div>
+                    {% if forloop.first %}
+                      <div class="col-md-1" data-repeater-create>
+                        <button type="button" class="btn btn-outline-brand btn-sm btn-icon btn-circle">
+                          <i class="la la-plus"></i>
+                        </button>
+                      </div>
+                      <div class="col-md-1" data-repeater-delete>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-icon btn-circle">
+                          <i class="la la-remove"></i>
+                        </button>
+                      </div>
+                    {% else %}
+                      <div class="col-md-1" data-repeater-delete>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-icon btn-circle">
+                          <i class="la la-remove"></i>
+                        </button>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            <input type="hidden" name="allowed_scope" value="">
+            <input type="hidden" name="default_scope" value="">
+            <input type="hidden" name="redirect_uri" value="">
+            <div class="form-group row" id="allowed_scope">
+              <div class="form-group col-md-3">
+                <label>{{ "Разрешенные права"|t }}</label>
+                <div class="invalid-feedback {% if errors.allowed_scope %} d-block {% endif %}">
+                  {{ errors.allowed_scope|join-errors }}
+                </div>
+              </div>
+              <div class="form-group col-md-8">
+                <label>{{ "Гражданин"|t }}</label>
+                <div class="kt-checkbox-list">
+                  {% for id, scope in scopes|get:"citizen" %}
+                    <label class="kt-checkbox"
+                           data-toggle="tooltip"
+                           data-placement="left"
+                           title="{{ scope.description }}">
+                      <input type="checkbox" value="{{ id }}"
+                             {% if client.allowed_scope|get:@id %}
+                             checked
+                              {% endif %}> {{ scope.name }}
+                      <span></span>
+                    </label>
+                  {% endfor %}
+                </div>
+              </div>
+              <!--              <div class="form-group col-md-4">-->
+              <!--                <label>{{ "Инстпектор"|t }}</label>-->
+              <!--                <div class="kt-checkbox-list">-->
+              <!--                  {% for id, scope in scopes|get:"inspector" %}-->
+              <!--                    <label class="kt-checkbox"-->
+              <!--                           data-toggle="tooltip"-->
+              <!--                           data-placement="left"-->
+              <!--                           title="{{ scope.description }}">-->
+              <!--                      <input type="checkbox" value="{{ id }}"-->
+              <!--                             {% if client.allowed_scope|get:@id %}-->
+              <!--                             checked-->
+              <!--                              {% endif %}> {{ scope.name }}-->
+              <!--                      <span></span>-->
+              <!--                    </label>-->
+              <!--                  {% endfor %}-->
+              <!--                </div>-->
+              <!--              </div>-->
+            </div>
+            <div class="form-group row" id="default_scope">
+              <div class="form-group col-md-3">
+                <label>{{ "Права поумолчанию"|t }}</label>
+                <div class="invalid-feedback {% if errors.default_scope %} d-block {% endif %}">
+                  {{ errors.default_scope|join-errors }}
+                </div>
+              </div>
+              <div class="form-group col-md-8">
+                <label>{{ "Гражданин"|t }}</label>
+                <div class="kt-checkbox-list">
+                  {% for id, scope in scopes|get:"citizen" %}
+                    <label class="kt-checkbox"
+                           data-toggle="tooltip"
+                           data-placement="left"
+                           title="{{ scope.description }}">
+                      <input type="checkbox" value="{{ id }}"
+                             {% if client.default_scope|get:@id %}
+                             checked
+                              {% endif %}> {{ scope.name }}
+                      <span></span>
+                    </label>
+                  {% endfor %}
+                </div>
+              </div>
+              <!--              <div class="form-group col-md-4">-->
+              <!--                <label>{{ "Инстпектор"|t }}</label>-->
+              <!--                <div class="kt-checkbox-list">-->
+              <!--                  {% for id, scope in scopes|get:"inspector" %}-->
+              <!--                    <label class="kt-checkbox"-->
+              <!--                           data-toggle="tooltip"-->
+              <!--                           data-placement="left"-->
+              <!--                           title="{{ scope.description }}">-->
+              <!--                      <input type="checkbox" value="{{ id }}"-->
+              <!--                             {% if client.default_scope|get:@id %}-->
+              <!--                             checked-->
+              <!--                              {% endif %}> {{ scope.name }}-->
+              <!--                      <span></span>-->
+              <!--                    </label>-->
+              <!--                  {% endfor %}-->
+              <!--                </div>-->
+              <!--              </div>-->
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-9">
+              <button type="submit" class="btn btn-success mr-2">
+                {{ "Сохранить"|t }}
+              </button>
+              <button type="reset" class="btn btn-secondary" onclick="history.go(-1)">
+                {{ "Назад"|t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+

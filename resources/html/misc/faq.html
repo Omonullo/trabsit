@@ -1,0 +1,101 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Часто задаваемые вопросы"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Часто задаваемые вопросы"|t }} {% endblock %}
+
+{% block roof %}
+<style>
+  #faq_naq .kt-nav__item {
+    padding: 0.5rem 0;
+  }
+
+  #faq_naq .kt-nav__item .kt-nav__link {
+    background-color: transparent !important;
+  }
+
+  #faq_naq .kt-nav__item .kt-nav__link > .kt-nav__link-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #a7abc3;
+    -webkit-transition: color 0.3s ease;
+    transition: color 0.3s ease;
+  }
+
+  #faq_naq .kt-nav__item:hover > .kt-nav__link > .kt-nav__link-text, #faq_naq .kt-nav__item.kt-nav__item--active > .kt-nav__link > .kt-nav__link-text {
+    color: #5d78ff;
+    -webkit-transition: color 0.3s ease;
+    transition: color 0.3s ease;
+  }
+
+  #faq_naq .kt-nav__item .kt-nav__sub .kt-nav__item {
+    padding: 0.25rem 0;
+  }
+
+</style>
+{% endblock %}
+
+{% block floor %}
+<script>
+  $(function () {
+    $('#faq_naq .kt-nav__item').on('click', function () {
+      $(this)
+        .addClass('kt-nav__item--active')
+        .siblings().removeClass('kt-nav__item--active');
+
+      var text = $(this).find('.kt-nav__link-text').text();
+
+      $('#questions [data-category]').each(function () {
+        if ($(this).data('category') === text) {
+           $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+
+      $('#questions [data-category]:visible:first .card-title').trigger('click');
+    });
+
+    $('#questions [data-category]').hide();
+    $('#faq_naq .kt-nav__item:first').trigger('click');
+  })
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__body">
+    <div class="row">
+      <div class="col-xl-3">
+        <ul class="kt-nav" id="faq_naq">
+          {% for category in categories %}
+          <li class="kt-nav__item">
+            <a class="kt-nav__link">
+              <span class="kt-nav__link-text">{{ category }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-xl-9">
+        <div class="accordion accordion-solid accordion-toggle-plus" id="questions">
+          {% for faq in faqs %}
+          <div class="card" data-category="{{ faq|t-get:category }}" style="display: none">
+            <div class="card-header">
+              <div class="card-title collapsed" data-toggle="collapse" data-target="#answer-{{ faq.number }}">
+                {{ faq|t-get:question }}
+              </div>
+            </div>
+            <div id="answer-{{ faq.number }}" class="collapse" data-parent="#questions" style="">
+              <div class="card-body">
+                {{ faq|t-get:answer|md->html }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

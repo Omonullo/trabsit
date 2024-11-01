@@ -1,0 +1,165 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Мои видеозаписи"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Мои видеозаписи"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "Загружайте видеофайлы на которых зафиксированы правонарушения"|t }} {% endblock %}
+
+{% block roof %}
+  <style>
+    .kt-portlet__body > .table {
+      min-width: 800px;
+    }
+
+    th {
+      font-weight: 500;
+    }
+
+    .sub-row {
+      overflow-x: auto;
+      font-size: 13px;
+    }
+
+    .sub-row div {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .row-align-middle td {
+      vertical-align: middle;
+    }
+
+    .kt-portlet__body {
+      overflow-x: auto;
+    }
+  </style>
+{% endblock %}
+
+{% block sub-header-toolbar %}
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <a href="{% path citizen.report/create %}" class="btn btn-ment kt-subheader__btn-options">
+      <i class="la la-cloud-upload"></i>
+      {{ "Загрузить"|t }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">{{ "Видеозаписи"|t }}</h3>
+    </div>
+    <div class="text-right ml-auto my-auto mr-3">
+      {{ "Количество"|t}} {{ count }}.
+    </div>
+    <div class="kt-portlet__head-toolbar">
+      <a href="#"
+         class='btn btn-bold btn-sm dropdown-toggle btn-label-{{ request.parameters.query.status|report-status-color|default:"brand" }}'
+         data-toggle="dropdown">
+        {{ request.parameters.query.status|report-status-name|default:"Все"|t }}
+      </a>
+      <div class="dropdown-menu dropdown-menu-fit dropdown-menu-right">
+        <ul class="kt-nav">
+          <li class="kt-nav__item"><a class="kt-nav__link" href="?status="><span
+                      class="kt-nav__link-text">{{ "Все"|t }}</span></a></li>
+          {% for status in statuses %}
+            <li class="kt-nav__item">
+              <a class="kt-nav__link" href="?status={{ status }}">
+                <span class="kt-nav__link-text">{{ status|report-status-name|t }}</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet__body overflow-auto">
+    {% empty-wrapper paged-rows %}
+    <table class="table">
+      <thead>
+      <tr>
+        <th>№</th>
+        <th>{{ "Фото"|t }}</th>
+        <th colspan="2">{{ "Адрес"|t }}</th>
+        <th>{{ "Номер для обращения"|t }}</th>
+        <th class="text-right">{{ "Статус"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for report in paged-rows %}
+        <tr class="row-align-middle report-status-{{ report.status }}">
+        <td>{{ report.number }}</td>
+        <td>
+          {% if report.thumbnail %}
+          <img class="report__thumbnail" src="{{ report.thumbnail }}">
+          {% endif %}
+        </td>
+        <td colspan="2">
+        <a href="{% path citizen.report/view id @report.id %}">
+        <div class="d-flex flex-row align-items-center">
+          <div class="flex-grow-1">
+            <i class="la la-map kt-font-danger"></i>
+            {{ report|address:true|linebreaks-br|safe }}
+            <br>
+            <i class="la la-calendar kt-label-font-color-1"></i> {{ report.create_time|local-date-time }}
+          </div>
+        </div>
+        </a>
+        </td>
+        <td>
+          {% if report.inspector %}
+          {% if report.inspector.public_phone %}
+          <i class="la la-phone kt-label-font-color-1"></i> {{ report.inspector.public_phone|phone }}
+          {% endif %}
+          {% endif %}
+        </td>
+        <td></td>
+        </tr>
+        <tr class="sub-row-head">
+          <th></th>
+          <th>№</th>
+          <th>{{ "Номер транспорта"|t}}</th>
+          <th>{{ "Описание"|t }}</th>
+          <th>{{ "Принятые меры"|t }}</th>
+          <th class="text-right"></th>
+        </tr>
+      {% for offense in report.offenses %}
+        {% if not offense.creator_staff_id %}
+          <tr class="sub-row">
+            <td></td>
+            <td class="align-middle">
+              {{ offense.number }}
+            </td>
+            <td>
+              <span class="vehicle_id vehicle_id-sm">{{ offense.vehicle_id }}</span>
+            </td>
+            <td>
+              <div style="max-width: 400px;">
+                {{ offense.testimony }}
+              </div>
+            </td>
+            <td class="text-left align-middle">
+              <div class="kt-label-font-color-2" style="max-width: 400px;">
+                {% offense-taken-measures @offense %}
+              </div>
+            </td>
+            <td class="align-middle text-right">
+              <div>
+                <span class="kt-badge kt-badge--inline kt-badge--{{ offense.status|offense-status-color }} no-wrap">{{ offense.status|offense-status-name|t }}</span>
+              </div>
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+
+    {% pager @total-pages @current-page @request.query-params %}
+    {% end-empty-wrapper %}
+  </div>
+</div>
+{% endblock %}

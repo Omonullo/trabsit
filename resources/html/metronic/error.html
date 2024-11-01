@@ -1,0 +1,26 @@
+{% extends "metronic/base.html" %}
+
+{% block title %}
+{{ status }} - {{ title }}
+{% endblock %}
+
+{% block roof %}
+<link href="/app/custom/error/error-v1.default.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block page %}
+<div class="kt-grid kt-grid--ver kt-grid--root">
+  <div class="kt-grid__item kt-grid__item--fluid kt-grid  kt-error-v1">
+    <div class="kt-error-v1__container container">
+      <h1 class="kt-error-v1__number">{{ status }}</h1>
+      <p class="kt-error-v1__desc">
+        {{ title|t }}
+      </p>
+
+      {% if data %}
+      <pre class="text-left d-inline-block mt-4 text-muted" style="display: inline-block; max-width: 90%; white-space: normal">{{ data }}</pre>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

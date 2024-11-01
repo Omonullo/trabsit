@@ -1,0 +1,119 @@
+.custom-file-label {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.kt-widget5 .kt-widget5__item {
+  .kt-widget5__content {
+    .kt-widget5__pic {
+      margin-right: 1.43rem;
+      img {
+        width: 8.6rem;
+        border-radius: 2px;
+      }
+    }
+    .kt-widget5__info span:nth-child(even) {
+      font-weight: unset;
+    }
+    .kt-widget5__stats:first-child {
+      padding-right: unset;
+    }
+    &:last-child > *:not(:last-child) {
+      padding-right: 3rem;
+    }
+  }
+  &:last-child {
+    border-bottom: unset;
+  }
+}
+
+.kt-datatable.kt-datatable--default {
+  > .kt-datatable__table {
+    display: unset;
+    > {
+      .kt-datatable__head, .kt-datatable__body, .kt-datatable__foot {
+        display: unset;
+      }
+    }
+  }
+  &.kt-datatable--loaded > .kt-datatable__table {
+    display: unset;
+    > {
+      .kt-datatable__head, .kt-datatable__body, .kt-datatable__foot, .kt-datatable__head .kt-datatable__row, .kt-datatable__body .kt-datatable__row, .kt-datatable__foot .kt-datatable__row {
+        display: unset;
+      }
+    }
+  }
+  &.kt-datatable--scroll > .kt-datatable__table {
+    display: unset;
+  }
+  > .kt-datatable__pager {
+    padding: 0;
+  }
+}
+
+.kt-portlet .kt-portlet__body.kt-portlet__body--fit {
+  padding: unset;
+}
+
+.kt-checkbox > input {
+  left: 3px;
+  top: 3px;
+}
+
+.kt-radio > span:after {
+  margin-left: unset;
+  margin-top: unset;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+@media (min-width: 1025px) {
+  .kt-header, .kt-header--fixed.kt-header--minimize .kt-header {
+    transition: height 0.1s ease;
+  }
+  .kt-header--minimize .kt-header {
+    .kt-header__brand-logo-default {
+      display: none;
+    }
+    .kt-container .kt-header__brand-logo-sticky {
+      display: inline-block;
+    }
+  }
+}
+
+.kt-header__brand .kt-header__brand-logo {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 1.4em;
+  line-height: 1.1;
+  color: kt-state-color(dark);
+}
+
+.kt-header-mobile__logo {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 1.4em;
+  line-height: 1.1;
+  color: kt-state-color(dark);
+}
+
+.kt-header-mobile__logo img {
+  margin-right: 1rem;
+}
+
+.kt-header--minimize .kt-header__brand .kt-header__brand-logo {
+  color: #6c7293;
+  font-size: 1.2em;
+}
+
+.kt-content > .kt-portlet:only-child {
+  min-height: calc(100vh - 270px);
+}
+
+
+.modal-open {
+  overflow: hidden !important;
+}

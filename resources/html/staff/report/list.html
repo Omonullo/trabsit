@@ -1,0 +1,237 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Видеозаписи"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Видеозаписи"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "Управление видеозаписями"|t }} {% endblock %}
+
+{% block roof %}
+  <style>
+    th {
+      font-weight: 500;
+    }
+
+    .kt-portlet__body > .table {
+      min-width: 800px;
+    }
+
+    .sub-row {
+      overflow-x: auto;
+      font-size: 13px;
+    }
+
+    .sub-row div {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .row-align-middle td {
+      vertical-align: middle;
+    }
+
+    .kt-portlet__body {
+      overflow-x: auto;
+    }
+
+    .report-status-created {
+      background-color: rgba(54,108,243,0.1);
+    }
+  </style>
+{% endblock %}
+{% block content %}
+
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Видеозаписи"|t }}
+      </h3>
+    </div>
+    <div class="kt-portlet__head-toolbar">
+      <a href="#" class="btn btn-label-brand btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        {% ifequal "create_time_asc" request.parameters.query.sort %}
+        {{ "Сначала старые"|t }}
+        {% else %}{% ifequal "create_time_desc" request.parameters.query.sort %}
+        {{ "Сначала новые"|t }}
+        {% endifequal %}{% endifequal %}
+      </a>
+      <div class="dropdown-menu dropdown-menu-fit dropdown-menu-right" x-placement="top-end">
+        <ul class="kt-nav">
+          <li class="kt-nav__head">{{ "Сортировка по дате"|t }}</li>
+          <li class="kt-nav__separator my-2"></li>
+          <li class="kt-nav__item {% ifequal "create_time_asc" request.parameters.query.sort %} kt-nav__item--active {% endifequal %}">
+            <a href="?{% query-string sort create_time_asc page nil %}" class="kt-nav__link">
+              <i class="kt-nav__link-icon la la-sort-alpha-asc"></i>
+              <span class="kt-nav__link-text">{{ "Сначала старые"|t }}</span>
+            </a>
+          </li>
+          <li class="kt-nav__item {% ifequal "create_time_desc" request.parameters.query.sort %} kt-nav__item--active {% endifequal %}">
+            <a href="?{% query-string sort create_time_desc page nil %}" class="kt-nav__link">
+              <i class="kt-nav__link-icon la la-sort-alpha-desc"></i>
+              <span class="kt-nav__link-text">{{ "Сначала новые"|t }}</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form kt-form--label-right kt-margin-t-10 kt-margin-b-20">
+      <input type="hidden" name="sort" value="{{ request.parameters.query.sort }}">
+
+      <div class="form-row align-items-center mb-3">
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter" for="create_time">{{ "Дата создания"|t }}</label>
+          <input type="text"
+                 id="create_time"
+                 name="create_time"
+                 class="form-control"
+                 autocomplete="off"
+                 value="{{ request.parameters.query.create_time|open-right-date-range }}">
+
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter">{{ "Город или область"|t }}</label>
+          {% area-select area_id false @request.parameters.query.area_id true %}
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter ">{{ "Район"|t }}</label>
+          {% district-select district_id false @request.parameters.query.district_id true %}
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter">№</label>
+          <input type="text" class="form-control" name="number" value="{{ request.parameters.query.number }}"/>
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter">{{ "Статус"|t }}</label>
+          <select class="form-control" name="status">
+            <option value=""></option>
+            {% for status in statuses %}
+            <option value="{{ status }}" {% ifequal status request.parameters.query.status %} selected {% endifequal %}>{{ status|report-status-name|t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% ifequal request.identity.role "admin" %}
+          <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+            <label class="font-weight-lighter">{{ "Гражданин"|t }}</label>
+            <select class="form-control" name="citizen_id" data-url="/staff/reports/citizen">
+              <option value="">Все...</option>
+              {% for citizen in citizens %}
+                <option value="{{ citizen.id }}" {% ifequal citizen.id request.parameters.query.citizen_id %} selected {% endifequal %}>
+                  {{ citizen.first_name }} {{ citizen.last_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endifequal %}
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter">{{ "В радусе от точки"|t }}</label>
+          <input type="text" class="form-control" placeholder="{{ "Долгота, широта, радиус"|t }}" name="point_radius" value="{% if request.parameters.query.point_radius %}{{ request.parameters.query.point_radius|join:", " }}{% endif %}"/>
+        </div>
+      </div>
+      <div class="form-row align-items-center">
+        <div class="col-md-6 col-sm-12 col-lg-4 px-3">
+          <button class="btn btn-outline-secondary">{{ "Поиск"|t }}</button>
+          <a href="?" class="btn btn-link">{{ "Сброс фильтра"|t }}</a>
+        </div>
+        <div class="col-md-6 col-sm-12 col-lg-8 px-3 text-right">
+          {{ "Количество"|t }} {{ count }}.
+        </div>
+      </div>
+    </form>
+
+    {% empty-wrapper paged-rows %}
+    <table class="table">
+      <thead>
+      <tr>
+        <th>№</th>
+        <th class="text-left">
+          <div class="ml-3">{{ "Фото"|t }}</div>
+        </th>
+        <th colspan="2">{{ "Адрес"|t }}</th>
+        <th>{{ "Гражданин"|t }}</th>
+        <th class="text-right">{{ "Статус"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for report in paged-rows %}
+        <tr class="row-align-middle report-status-{{ report.status }}">
+        <td>{{ report.number }}</td>
+        <td class="text-left">
+          {% if report.thumbnail %}
+          <img class="report__thumbnail" src="{{ report.thumbnail }}">
+          {% endif %}
+        </td>
+        <td colspan="2">
+        <a href="{% report-link-v2 @report %}">
+        <i class="la la-map kt-label-font-color-1"></i>
+        {{ report|address:true|linebreaks-br|safe }}
+        <br>
+        <i class="la la-calendar kt-label-font-color-1"></i>
+        <span class="kt-label-font-color-2">{{ report.create_time|local-date-time }}</span>
+        </a>
+        </td>
+        <td>
+          <i class="la la-user kt-label-font-color-1"></i>  {% private %} {{ report.citizen.first_name }} {{ report.citizen.last_name }}{% end-private %}
+          <br>
+          <i class="la la-phone kt-label-font-color-1"></i>
+          {% private %} {{ report.citizen.phone|phone }} {% end-private %}
+        </td>
+        <td class="text-right">
+          {% ifequal report.status "created" %}
+            <a href="{% report-link-v2 @report %}"><i class="fa fa-edit kt-label-font-color-2"></i></a>
+          {% else %}
+            <a href="{% report-link-v2 @report %}"><i class="fa fa-info-circle kt-label-font-color-1"></i></a>
+          {% endifequal %}
+        </td>
+        </tr>
+        <tr>
+          <th></th>
+          <th>№</th>
+          <th class="no-wrap">{{ "Номер транспорта"|t }}</th>
+          <th>{{ "Описание"|t }}</th>
+          <th>{{ "Принятые меры"|t }}</th>
+          <th></th>
+        </tr>
+      {% for offense in report.offenses %}
+        <tr class="sub-row">
+        <td></td>
+        <td class="text-left kt-label-font-color-2">
+          {{ offense.number }}
+          <div class="ml-5">
+          </div>
+        </td>
+        <td>
+          <span class="text-left vehicle_id vehicle_id-sm">{{ offense.vehicle_id }}</span>
+        </td>
+        <td class="align-middle kt-label-font-color-3">
+          <div style="max-width: 400px;" data-toggle="tooltip" data-placement="bottom" title="{{ offense.testimony }}">
+            {{ offense.testimony }}
+          </div>
+        </td>
+        <td class="text-left align-middle" data-toggle="tooltip"
+            data-placement="bottom" title="{% offense-taken-measures @offense %}">
+        <div class="kt-label-font-color-3" style="max-width: 400px;">
+          {% offense-taken-measures @offense %}
+        </div>
+        </td>
+        <td class="align-middle text-right">
+          <div>
+            <span class="kt-badge kt-badge--inline kt-badge--{{ offense.status|offense-status-color }} no-wrap"
+            {% if offense.failure_message %}
+            title="{{ offense.failure_message }}"
+            {% endif %}
+            >{{ offense.status|offense-status-name|t }}</span>
+          </div>
+        </td>
+        </tr>
+      {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+    {% pager @total-pages @current-page @request.query-params %}
+    {% end-empty-wrapper %}
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Причины отклонений"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Причины отклонений"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "Текст причин отклонений"|t }} {% endblock %}
+
+{% block sub-header-toolbar %}
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <a href="{% path staff.response/create %}" class="btn btn-ment kt-subheader__btn-options">
+      <i class="la la-cloud-upload"></i>
+      {{ "Добавить"|t }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Причины отклонений"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th class="text-right">Номер</th>
+        <th>Код</th>
+        <th>{{ "Краткий текст"|t }} / {{ "Текст"|t }}</th>
+        <th>{{ "Статус"|t }}</th>
+        <th class="text-right">{{ "Действие"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for response in responses %}
+        <tr>
+          <td class="text-right">{{ response.priority }}</td>
+          <td>{{ response.number }}</td>
+          <td>
+            <div><span class="kt-font-success"> ru </span> {{ response.alias_ru }}</div>
+            <div><span class="kt-font-success"> uz </span> {{ response.alias_uz_la }}</div>
+            <div><span class="kt-font-success"> ўз </span> {{ response.alias_uz_cy }}</div>
+            <br>
+            <div><span class="kt-font-success"> ru </span> {{ response.text_ru }}</div>
+            <div><span class="kt-font-success"> uz </span> {{ response.text_uz_la }}</div>
+            <div><span class="kt-font-success"> ўз </span> {{ response.text_uz_cy }}</div>
+          </td>
+          <td>
+            {% if response.obsolete %}
+              <div class="kt-font-warning">
+                {{ "Устарел"|t }}
+              </div>
+            {% else %}
+              <div class="kt-font-success">
+                {{ "Доступен"|t }}
+              </div>
+            {% endif %}
+          </td>
+          <td class="text-right">
+            <a href="{% path staff.response/edit id @response.id %}" class="btn btn-sm btn-clean btn-icon btn-icon-md"
+               title="{{ "Редактировать"|t }}">
+              <i class="la la-edit"></i>
+            </a>
+            <form class="d-inline" method="post" action="{% path staff.response/delete id @response.id %}">
+              {% csrf-field %}
+              <button class="btn btn-sm btn-clean btn-icon btn-icon-md confirm-click"
+                      data-confirmation='{{ "Вы точно хотите удалить эту причину отклонения?"|t }}'>
+                <i class="la la-remove"></i>
+              </button>
+            </form>
+          </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

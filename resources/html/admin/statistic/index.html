@@ -1,0 +1,615 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Статистика"|t }}{% endblock %}
+{% block sub-header-title %}{{ "Статистика"|t }}{% endblock %}
+
+{% block floor %}
+  <script src="/npm/jszip/dist/jszip.min.js" type="text/javascript"></script>
+  <script src="/npm/datatables/media/js/jquery.dataTables.js" type="text/javascript"></script>
+  <script src="/npm/datatables.net-buttons/js/dataTables.buttons.min.js" type="text/javascript"></script>
+  <script src="/npm/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js" type="text/javascript"></script>
+  <script src="/npm/datatables.net-buttons/js/buttons.html5.min.js" type="text/javascript"></script>
+  <script src="/npm/highcharts/highcharts.js" type="text/javascript"></script>
+  <script src="/npm/file-saver/dist/FileSaver.min.js"></script>
+  <script src="/npm/xlsx-styled-rows/dist/xlsx.core.min.js"></script>
+  <script src="/js/statistics.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block roof %}
+  <link href="/npm/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css"/>
+  <link href="/npm/highcharts/css/highcharts.css" rel="stylesheet" type="text/css"/>
+  <link href="/css/statistics.css" rel="stylesheet" type="text/css"/>
+  <style>
+    .table-collapse > i {
+
+      transition: transform 0.3s ease-in;
+      transform-origin: center;
+    }
+
+    .table-collapse.collapsed > i {
+      transform: translateX(-25%) rotate(180deg);
+    }
+
+    #reviewed_reports_table_wrapper tbody tr td:first-child {
+      vertical-align: top;
+    }
+
+    #area_table tbody tr th {
+      vertical-align: bottom;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  {% if balance %}
+  <div class="kt-portlet">
+    <div class="kt-portlet__body kt-portlet__body--fit">
+      <div class="row row-no-padding row-col-separator-xl">
+        <div class="col-md-12 col-lg-12 col-xl-6">
+          <div class="kt-widget1">
+            <div class="kt-widget1__item">
+              <div class="kt-widget1__info">
+                <h3 class="kt-widget1__title">Paynet</h3>
+                <span class="kt-widget1__desc">{{ "Пополнение мобильного счета"|t }}</span>
+              </div>
+              <span class="kt-widget1__number kt-font-brand">0 {{ "сум"|t }}</span>
+            </div>
+            <div class="kt-widget1__item">
+              <div class="kt-widget1__info">
+                <h3 class="kt-widget1__title">Uzcard</h3>
+                <span class="kt-widget1__desc">{{ "Перевод на карту"|t }}</span>
+              </div>
+              <span class="kt-widget1__number kt-font-brand">0 {{ "сум"|t }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 col-lg-12 col-xl-6">
+          <div class="kt-widget1">
+            <div class="kt-widget1__item">
+              <div class="kt-widget1__info">
+                <h3 class="kt-widget1__title">Bank</h3>
+                <span class="kt-widget1__desc">{{ "Банковский перевод"|t }}</span>
+              </div>
+              <span class="kt-widget1__number kt-font-danger">0 {{ "сум"|t }}</span>
+            </div>
+            <div class="kt-widget1__item">
+              <div class="kt-widget1__info">
+                <h3 class="kt-widget1__title">Humo</h3>
+                <span class="kt-widget1__desc">{{ "Перевод на карту"|t }}</span>
+              </div>
+              <span class="kt-widget1__number kt-font-danger">0 {{ "сум"|t }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {% if request.identity.area_id %}
+            {{ "Статистика статусов нарушений в разрезе по статьям"|t }}
+            {% else %}
+            {{ "Статистика статусов нарушений в разрезе по статьям"|t }}
+          {% endif %}
+        </h3>
+      </div>
+
+      {% with identity-area-name=request.identity.area_id|area-name %}
+        <div class="kt-portlet__head-toolbar">
+          <a href="{% path staff.statistics/offenses-map %}" class="btn btn-sm btn-primary mr-2" target="_blank">
+            {{ "Открыть на карте"|t }}
+          </a>
+          <a class="btn btn-bold btn-sm dropdown-toggle btn-label-brand article-area-dropdown"
+             aria-expanded="false"
+             data-toggle="dropdown"
+                  {% if identity-area-name %}
+                    data-default-article-area-id="{{ request.identity.area_id }}"
+                  {% endif %}
+          >
+            {% if identity-area-name %}
+              <span class="kt-nav__link-text">{{ identity-area-name }}</span>
+              {% else %}
+              <span class="kt-nav__link-text">{{ "Республика"|t }}</span>
+            {% endif %}
+          </a>
+          <div class="dropdown-menu dropdown-menu-fit dropdown-menu-right" x-placement="bottom-end"
+               style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(1353px, 46px, 0px);">
+            <ul class="kt-nav">
+              {% if identity-area-name %}
+                <li class="kt-nav__item">
+                  <a class="kt-nav__link">
+                    <span class="kt-nav__link-text">{{ identity-area-name }}</span>
+                  </a>
+                </li>
+                {% else %}
+                <li class="kt-nav__item">
+                  <a class="kt-nav__link article-area-select">
+                    <span class="kt-nav__link-text">Республика</span>
+                  </a>
+                </li>
+                {% for area in areas %}
+                  <li class="kt-nav__item">
+                    <a class="kt-nav__link article-area-select" data-area-id="{{ area.id }}">
+                      <span class="kt-nav__link-text">{{ area.name }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              {% endif %}
+
+            </ul>
+          </div>
+        </div>
+      {% endwith %}
+    </div>
+    <div class="kt-portlet__body">
+      <div class="kt_table_1_wrapper">
+        <table id="article_funnel_table" class="display table table-bordered table-hover dataTable no-footer dtr-inline"
+               style="border-top: none; border-bottom: none;">
+          <thead>
+          <tr>
+            <th rowspan="2" class="align-bottom">
+              {{ "Статья"|t }}
+            </th>
+            <th rowspan="2" class="align-bottom">
+              {{ "Краткое название"|t }}
+            </th>
+
+            <th rowspan="2" class="align-bottom" rowspan="2"
+                data-content='{{ "Правонарушения которые были приняты инспектором и применены статьи кодекса"|t|escape }}'>
+              {{ "Приняты инспектором. Из этого → "|t }}
+            </th>
+
+            <th class="align-bottom text-center" rowspan="2" data-toggle="kt-popover" data-container="body"
+                data-placement="top"
+                data-content='{{ "Правонарушения которые успешно отправлены и получены КСУБД, но ejarima не получил номер постановления"|t|escape }}'>
+              {{ "Ожидание номера постановления"|t }}
+            </th>
+
+            <th class="align-bottom text-center" rowspan="2" data-toggle="kt-popover" data-container="body"
+                data-placement="top"
+                data-content='{{ "Правонарушения не были приняты КСУБД в основном по причине отсутствия номера авто в базе или другие тех.причины"|t|escape }}'>
+              {{ "Не доставлен"|t }}
+            </th>
+
+            <th class="align-bottom text-center" rowspan="2" data-toggle="kt-popover" data-container="body"
+                data-placement="top"
+                data-content='{{ "КСУБД принял дал номер постановления, потом отменил. Причина отмены не известно"|t }}'>
+              {{ "Отменен"|t }}
+            </th>
+
+            <th class="border-bottom-0 text-center" colspan="2" data-toggle="kt-popover" data-container="body"
+                data-placement="top"
+                data-content='{{ "Оплаченные правонарушения. Одно постановление может быть и в Отменен и в оплачен. Сумма не учитывает %s скидку на штраф"|t:"30%" }}'>
+              {{ "Оплачены"|t }}
+            </th>
+
+            <th class="border-bottom-0 text-center" colspan="2" data-toggle="kt-popover" data-container="body"
+                data-placement="top"
+                data-content="{{ "Со дня рассмотрения инспектором правонарушения статус ''ожидание оплаты'' меньше чем 60 дней."|t|escape }}">
+              {{ "Не оплачены"|t }}
+            </th>
+
+            <th class="border-bottom-0 text-center" colspan="2" data-toggle="kt-popover" data-container="body"
+                data-placement="top"
+                data-content="{{ "Со дня рассмотрения инспектором правонарушения статус ''ожидание оплаты'' больше чем 60 дней."|t }}">
+              {{ "Просрочены"|t }}
+            </th>
+
+          </tr>
+          <tr>
+
+            <th>{{ "Число"|t }}</th>
+            <th>{{ "Сумма"|t }}</th>
+
+            <th>{{ "Число"|t }}</th>
+            <th>{{ "Сумма"|t }}</th>
+
+            <th>{{ "Число"|t }}</th>
+            <th class="border-right">{{ "Сумма"|t }}</th>
+          </tr>
+          </thead>
+          <tfoot>
+          <tr>
+            <th colspan="2">{{ "Всего"|t }}</th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {% if request.identity.area_id %}
+            {{ "Общий отчет по регионам"|t }}
+            {% else %}
+            {{ "Общий отчет по районам"|t }}
+          {% endif %}
+        </h3>
+      </div>
+      <div class="kt-portlet__head-toolbar area-offense-overall-stats"></div>
+    </div>
+    <div class="kt-portlet__body">
+      <div class="kt_table_1_wrapper">
+        <table id="area_offense_table" class="display table table-bordered table-hover dataTable no-footer dtr-inline" style="border-top: none; border-bottom: none;">
+          <thead>
+          <tr>
+            <th rowspan="2" class="align-bottom">
+              {% if request.identity.area_id %}
+                {{ "Район"|t }}
+                {% else %}
+                {{ "Регион"|t }}
+              {% endif %}
+            </th>
+            <th rowspan="2" class="align-bottom"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Поступило видеозаписей - количество поступивших видеозаписей за выбранный период"|t|escape }}'>
+              {{ "Поступило видеозаписей"|t }}</th>
+            <th rowspan="2" class="align-bottom"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Поступило нарушений - количество поступивших правонарушений за выбранный период"|t|escape }}'>
+              {{ "Поступило нарушений"|t }}</th>
+            <th rowspan="2" class="align-bottom"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Принято - количество принятых правонарушений (до отправки в КСУБД) за выбранный период"|t|escape }}'>
+              {{ "Принято"|t }}</th>
+            <th rowspan="2" class="align-bottom"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Ожидают - количество ожидающих правонарушений на конец выбранного периода"|t|escape }}'>
+              {{ "Ожидают"|t }}</th>
+            <th rowspan="2" class="align-bottom"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Отклонено - количество отклоненных правонарушений за выбранный период"|t|escape }}'>
+              {{ "Отклонено"|t }}</th>
+            <th class="border-bottom-0 text-center" colspan="2"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Выписано - количество выписанных штрафов за выбранный период"|t|escape }}'>
+              {{ "Выписано"|t }}</th>
+            <th class="border-bottom-0 text-center" colspan="2"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Оплачено - количество оплаченных штрафов за выбранный период"|t|escape }}'>
+              {{ "Оплачено"|t }}</th>
+            <th class="border-bottom-0 text-center" colspan="2"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Неоплачено - количество неоплаченных штрафов на конец выбранного периода (менее 60 дней)"|t|escape }}'>
+              {{ "Неоплачено всего"|t }}</th>
+            <th class="border-bottom-0 text-center" colspan="2"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Просрочено - количество просроченных штрафов на конец выбранного периода (более 60 дней)"|t|escape }}'>
+              {{ "Просрочено всего"|t }}</th>
+          </tr>
+          <tr>
+            <th class="">{{ "Число"|t }}</th>
+            <th class="">{{ "Сумма"|t }}</th>
+
+            <th class="">{{ "Число"|t }}</th>
+            <th class="">{{ "Сумма"|t }}</th>
+
+            <th class="">{{ "Число"|t }}</th>
+            <th class="">{{ "Сумма"|t }}</th>
+
+            <th class="">{{ "Число"|t }}</th>
+            <th class="">{{ "Сумма"|t }}</th>
+
+          </tr>
+          </thead>
+          <tfoot>
+          <tr>
+            <th>{{ "Всего"|t }}</th>
+            <th class="total-count"></th>
+            <th class="reviewed-count"></th>
+            <th class="pending-count"></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {% if request.identity.area_id %}
+            {{ "Детальный отчет по статусам"|t }}
+            {% else %}
+            {{ "Детальный отчет по статусам"|t }}
+          {% endif %}
+        </h3>
+      </div>
+      <div class="kt-portlet__head-toolbar area-offense-overall-stats"></div>
+    </div>
+    <div class="kt-portlet__body">
+      <div class="kt_table_1_wrapper">
+        <table id="offense_funnel_table" class="display table table-bordered table-hover dataTable no-footer dtr-inline" style="border-top: none; border-bottom: none;">
+          <thead>
+          <tr>
+            <th rowspan="2" class="align-bottom">
+              {% if request.identity.area_id %}
+                {{ "Район"|t }}
+                {% else %}
+                {{ "Регион"|t }}
+              {% endif %}
+            </th>
+            <th class="border-bottom-0 text-center" colspan="4" data-toggle="kt-popover" data-container="body" data-placement="top">{{ "videoJarima"|t }}</th>
+            <th class="border-bottom-0 text-center" colspan="5" data-toggle="kt-popover" data-container="body" data-placement="top">{{ "КСУБД"|t }}</th>
+            <th class="border-bottom-0 text-center" colspan="2" data-toggle="kt-popover" data-container="body" data-placement="top">{{ "Оплачено"|t }}</th>
+            <th class="border-bottom-0 text-center" colspan="2" data-toggle="kt-popover" data-container="body" data-placement="top">{{ "Неоплачено"|t }}</th>
+            <th class="border-bottom-0 text-center" colspan="2" data-toggle="kt-popover" data-container="body" data-placement="top">{{ "Просрочено"|t }}</th>
+          </tr>
+          <tr>
+            <th class="">{{ "Поступило нарушений"|t }}</th>
+            <th class="">{{ "Ожидают"|t }}</th>
+            <th class="">{{ "Отклонено"|t }}</th>
+            <th class="">{{ "Принято"|t }}</th>
+
+            <th class="">{{ "Не доставлено"|t }}</th>
+            <th class="">{{ "Доставлено"|t }}</th>
+            <th class="">{{ "Ожидают оформления"|t }}</th>
+            <th class="">{{ "Отклонено судом"|t }}</th>
+            <th class="">{{ "Оформлено"|t }}</th>
+
+            <th class="">{{ "Число"|t }}</th>
+            <th class="">{{ "Сумма"|t }}</th>
+
+            <th class="">{{ "Число"|t }}</th>
+            <th class="">{{ "Сумма"|t }}</th>
+
+            <th class="">{{ "Число"|t }}</th>
+            <th class="">{{ "Сумма"|t }}</th>
+
+          </tr>
+          </thead>
+          <tfoot>
+          <tr>
+            <th>{{ "Всего"|t }}</th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {{ "Статистика вознаграждений"|t }}
+        </h3>
+      </div>
+      <div class="kt-portlet__head-toolbar"></div>
+    </div>
+    <div class="kt-portlet__body">
+      <div class="kt_table_1_wrapper">
+        <table id="fine_reward_table" class="display table table-bordered table-hover dataTable no-footer dtr-inline"
+               style="border-top: none; border-bottom: none;">
+          <thead>
+          <tr>
+            <th rowspan="2" class="align-bottom text-center">№</th>
+            <th colspan="3" class="align-bottom text-center"
+                data-toggle="kt-popover" data-container="body" data-placement="top"
+                data-content='{{ "Оплаченные штрафы за выбранный промежуток"|t|escape }}'>
+              {{ "Оплаченные штрафы"|t }}</th>
+            <th colspan="3" class="align-bottom text-center"
+                data-toggle="kt-popover" data-container="body" data-placement="top" data-content='{{ "Выплаченные вознаграждения могут быть вне выбранного промежутка"|t|escape }}'>
+              {{ "Выплаченные вознаграждения"|t }}</th>
+          </tr>
+          <tr>
+            <th class="text-center">{{ "Штраф"|t }}</th>
+            <th class="text-center">{{ "Кол-во"|t }}</th>
+            <th class="text-center">{{ "Сумма"|t }}</th>
+            <th class="text-center">{{ "Вознаграждение"|t }}</th>
+            <th class="text-center">{{ "Кол-во"|t }}</th>
+            <th class="text-center">{{ "Сумма"|t }}</th>
+          </tr>
+          </thead>
+          <tfoot>
+          <tr>
+            <th>{{ "Всего"|t }}</th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {{ "Кол-во просроченных видеозаписей"|t }} ({{ "со дня создания которых прошло более 3х дней"|t }})
+        </h3>
+      </div>
+      <div class="kt-portlet__head-toolbar expired-overall-stats"></div>
+
+    </div>
+    <div class="kt-portlet__body">
+      <div id="expiry-chart" class="my-2"></div>
+      <div class="expiry-data">
+        <a class="btn btn-light table-collapse collapsed w-100" data-toggle="collapse" href="#collapse-expiry-table"
+           role="button">
+          <i class="la la-angle-up" data-fa-transform="rotate-180"></i>
+        </a>
+        <div class="collapse" id="collapse-expiry-table">
+          <div class="card card-body">
+            <div class="kt_table_1_wrapper">
+              <table id="expiry_table" class="display table table-bordered table-hover dataTable no-footer dtr-inline">
+                <thead>
+                <tr>
+                  <th rowspan="2">
+                    {% if request.identity.area_id %}
+                      {{ "Район"|t }}
+                      {% else %}
+                      {{ "Регион"|t }}
+                    {% endif %}
+                  </th>
+                  <th colspan="11" class="text-center">{{ "Просрочено на"|t }}</th>
+                </tr>
+                <tr>
+                  <th>{{ "%s день"|t:1 }}</th>
+                  <th>{{ "%s дня"|t:2 }}</th>
+                  <th>{{ "%s дня"|t:3 }}</th>
+                  <th>{{ "%s дня"|t:4 }}</th>
+                  <th>{{ "%s дней"|t:5 }}</th>
+                  <th>{{ "%s дней"|t:6 }}</th>
+                  <th>{{ "%s дней"|t:7 }}</th>
+                  <th>{{ "%s дней"|t:8 }}</th>
+                  <th>{{ "%s дней"|t:9 }}</th>
+                  <th>{{ "%s дней"|t:10 }}</th>
+                  <th>{{ "11 дней и более"|t }}</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                  <th style="text-align:right">{{ "Всего"|t }}:</th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th class="total-expired-count"></th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {{ "Кол-во рассмотренных видеозаписей инспектором"|t }}
+        </h3>
+      </div>
+      <div class="kt-portlet__head-toolbar">
+        <div class="reviewed-overall-stats"></div>
+        {% with default-area=areas|first %}
+          <a class="btn btn-bold btn-sm dropdown-toggle btn-label-brand area-dropdown"
+             aria-expanded="false"
+             data-toggle="dropdown"
+             data-default-area-id="{{ default-area.id }}">
+            <span class="kt-nav__link-text">{{ default-area.name }}</span>
+          </a>
+        {% endwith %}
+        <div class="dropdown-menu dropdown-menu-fit dropdown-menu-right" x-placement="bottom-end"
+             style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(1353px, 46px, 0px);">
+          <ul class="kt-nav">
+            {% for area in areas %}
+              <li class="kt-nav__item">
+                <a class="kt-nav__link area-select" data-area-id="{{ area.id }}">
+                  <span class="kt-nav__link-text">{{ area.name }}</span>
+                </a>
+              </li>
+            {% endfor %}
+            {% ifunequal request.identity.role "inspector" %}
+              <li class="kt-nav__item"><a class="kt-nav__link area-select">
+                  <span class="kt-nav__link-text">{{ "Не привязан"|t }}</span>
+                </a>
+              </li>
+            {% endifunequal %}
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <div id="reviewed-reports-chart" class="my-2"></div>
+      <div class="reviewed-reports-data">
+        <a class="btn btn-light table-collapse collapsed w-100" data-toggle="collapse" href="#collapse-inspector-table"
+           role="button">
+          <i class="la la-angle-up" data-fa-transform="rotate-180"></i>
+        </a>
+        <div class="collapse" id="collapse-inspector-table">
+          <div class="card card-body">
+            <div class="kt_table_1_wrapper">
+              <table id="reviewed_reports_table"
+                     class="display table table-bordered table-hover dataTable no-footer dtr-inline">
+                <thead>
+                <tr>
+                  <th>
+                    {% if request.identity.area_id %}
+                      {{ "Район"|t }}
+                      {% else %}
+                      {{ "Регион"|t }}
+                    {% endif %}
+                  </th>
+                  <th>{{ "Инспектор"|t }}</th>
+                  <th>{{ "За сегодня"|t }}</th>
+                  <th>{{ "За последние 3 дня"|t }}</th>
+                  <th>{{ "За последние 7 дней"|t }}</th>
+                  <th>{{ "За последние 30 дней"|t }}</th>
+                  <th>{{ "Всего"|t }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                  <th colspan="2" class="text-center">{{ "Всего"|t }}</th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th class="total-reviewed-count"></th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

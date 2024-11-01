@@ -1,0 +1,124 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Вознаграждение"|t }} №{{ reward.number }}{% endblock %}
+{% block sub-header-title %} {{ "Вознаграждение"|t }} №{{ reward.number }} {% endblock %}
+
+
+{% block roof %}
+  <style>
+      .modal-body {
+          overflow-x: auto;
+      }
+
+      code {
+          white-space: pre-wrap;
+          display: block;
+          min-width: 600px;
+      }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div
+      class="kt-portlet__head kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ reward.status|reward-status-color }} pr-0">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Общие данные"|t }}
+      </h3>
+    </div>
+
+    <div class="kt-portlet__head-toolbar align-items-center">
+      <div class="kt-ribbon__target">
+        <span class="kt-ribbon__inner"></span>
+        {{ reward.status|reward-status-name|t }}
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <div class="row" style="margin-top: -1rem">
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Номер видеозаписи"|t }}</div>
+        <div><a href="{% path staff.report/view id @reward.report.id %}">{{ reward.report.number }}</a></div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Номер нарушения"|t }}</div>
+        <div><a
+              href="{% path staff.report/view id @reward.report.id %}#{{ reward.offense.number }}">{{ reward.offense.number }}</a>
+        </div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Сумма вознаграждения"|t }}</div>
+        <div>{{ reward.amount|money }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Сумма штрафа"|t }}</div>
+        <div>{{ reward.offense.fine|money }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Регион"|t }}</div>
+        <div>{{ reward.report|address:false }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Дата создания"|t }}</div>
+        <div>{{ reward.create_time|local-date-time }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Данные оплаты"|t }}</div>
+        <div>{{ reward.params|reward }}</div>
+      </div>
+      {% ifequal reward.status "failed" %}
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Время ошибки"|t }}</div>
+        <div>{{ reward.failure_time|local-date-time }}</div>
+      </div>
+      {% endifequal %}
+      {% ifequal reward.status "paid" %}
+        <div class="col-md-6 mt-3">
+          <div class="kt-label-font-color-2">{{ "Время оплаты"|t }}</div>
+          <div>{{ reward.pay_time|local-date-time }}</div>
+        </div>
+      {% endifequal %}
+    </div>
+  </div>
+</div>
+
+
+{% if reward.failure_message %}
+  {% ifequal reward.status "failed" %}
+    <div class="kt-portlet">
+      <div class="kt-portlet__head">
+        <div class="kt-portlet__head-label">
+          <h3 class="kt-portlet__head-title">
+            {{ "Повторная отправка"|t }}
+          </h3>
+        </div>
+      </div>
+      <div class="kt-portlet__body">
+        <form method="post" action="{% path staff.reward/repay id @reward.id %}">
+          {% csrf-field %}
+          <div class="row">
+            <div class="col-lg-2"></div>
+            <div class="col-lg-8">
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Номер карты"|t }}</label>
+                <div class="col-md-9">
+                  <p>{{ "Вознаграждения будут перечислены на банковскую карту, указанную в профиле. Процесс перевода средств осуществляется ежедневно на основе совокупности всех зачислений, подлежащих выплате на данный момент. Следовательно, все начисленные вознаграждения за период будут объединены в один платеж." | t }}</p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-9">
+                  <button type="submit" class="btn btn-success mr-2">{{ "Сохранить и отправить повторно"|t }}</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-2"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endifequal %}
+{% endif %}
+{% endblock %}

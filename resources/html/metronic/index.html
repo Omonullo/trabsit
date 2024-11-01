@@ -1,0 +1,358 @@
+{% extends "metronic/base.html" %}
+
+{% block page %}
+
+<div id="kt_header_mobile" class="kt-header-mobile  kt-header-mobile--fixed ">
+  <a class="kt-header-mobile__logo no-wrap" href="/">
+    <img alt="Logo" src="/img/logo.svg" height="40px"/>
+    <span>videoJarima</span>
+  </a>
+  <div class="kt-header-mobile__toolbar">
+    <button class="kt-header-mobile__toolbar-toggler" id="kt_header_mobile_toggler"><span></span></button>
+    <button class="kt-header-mobile__toolbar-topbar-toggler" id="kt_header_mobile_topbar_toggler"><i
+      class="flaticon-more-1"></i></button>
+  </div>
+</div>
+
+<div class="kt-grid kt-grid--hor kt-grid--root">
+  <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--ver kt-page">
+    <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor kt-wrapper " id="kt_wrapper">
+      <div id="kt_header" class="kt-header kt-header--fixed {% block header-class %}{% endblock %}">
+        <div class="kt-container">
+
+          <div class="kt-header__brand kt-grid__item" id="kt_header_brand">
+            <a class="kt-header__brand-logo no-wrap" href="/">
+              <img alt="Logo" src="/img/logo.svg" class="kt-header__brand-logo-default mr-3" height="50px"/>
+              <img alt="Logo" src="/img/logo.svg" class="kt-header__brand-logo-sticky mr-3" height="30px"
+                   style="margin-left: 1rem"/>
+              <span>videoJarima</span>
+            </a>
+          </div>
+
+          {% ifequal request.identity.role "admin" %}
+          <div class="kt-header-menu-wrapper kt-grid__item kt-grid__item--fluid"
+               id="kt_header_menu_wrapper">
+            <div id="kt_header_menu" class="kt-header-menu kt-header-menu-mobile ">
+              <ul class="kt-menu__nav">
+                {% menu-item staff.report/index %}
+                <span class="kt-menu__link-text">{{ "Видеозаписи"|t }}</span>
+                {% report-menu-badge %}
+                {% end-menu-item %}
+                {% menu-item staff.offense/index %}
+                <span class="kt-menu__link-text">{{ "Правонарушения"|t }}</span>
+                {% offense-menu-badge %}
+                {% end-menu-item %}
+                {% menu-item admin.reward/index %}
+                <span class="kt-menu__link-text">{{ "Вознаграждения"|t }}</span>
+                {% reward-menu-badge %}
+                {% end-menu-item %}
+                {% menu-item staff.statistics/index %}
+                <span class="kt-menu__link-text">{{ "Статистика"|t }}</span>
+                {% end-menu-item %}
+                {% dropdown-menu-item %}
+                <span class="kt-menu__link-text">{{ "Прочее"|t }}</span>
+                {% dropdown-menu-sub-items %}
+                {% menu-item admin.citizen/index %}
+                <span class="kt-menu__link-text">{{ "Пользователи"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.offense-type/index %}
+                <span class="kt-menu__link-text">{{ "Типы нарушений"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.staff/index %}
+                <span class="kt-menu__link-text">{{ "Сотрудники"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item staff.response/index %}
+                <span class="kt-menu__link-text">{{ "Причины отклонений"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.article/index %}
+                <span class="kt-menu__link-text">{{ "Статьи"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.faq/index %}
+                <span class="kt-menu__link-text">{{ "Вопросы"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.area/index %}
+                <span class="kt-menu__link-text">{{ "Области"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.district/index %}
+                <span class="kt-menu__link-text">{{ "Районы"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.config/mwage %}
+                <span class="kt-menu__link-text">{{ "Настройка МРЗП"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.client/index %}
+                <span class="kt-menu__link-text">{{ "Клиенты"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.audit/index %}
+                <span class="kt-menu__link-text">{{ "Аудит"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item admin.transfer/index %}
+                <span class="kt-menu__link-text">{{ "Переводы"|t }}</span>
+                {% end-menu-item %}
+                {% end-dropdown-menu-item %}
+              </ul>
+            </div>
+          </div>
+          {% endifequal %}
+
+          {% ifequal request.identity.role "inspector" %}
+          <div class="kt-header-menu-wrapper kt-grid__item kt-grid__item--fluid"
+               id="kt_header_menu_wrapper">
+            <div id="kt_header_menu" class="kt-header-menu kt-header-menu-mobile ">
+              <ul class="kt-menu__nav">
+                {% menu-item staff.report/index %}
+                <span class="kt-menu__link-text">{{ "Видеозаписи"|t }}</span>
+                {% report-menu-badge %}
+                {% end-menu-item %}
+                {% menu-item staff.offense/index %}
+                <span class="kt-menu__link-text">{{ "Правонарушения"|t }}</span>
+                {% offense-menu-badge %}
+                {% end-menu-item %}
+                {% menu-item staff.statistics/index %}
+                <span class="kt-menu__link-text">{{ "Статистика"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item staff.rewards/index %}
+                <span class="kt-menu__link-text">{{ "Мои вознаграждения"|t }}</span>
+                {% end-menu-item %}
+                {% dropdown-menu-item %}
+                <span class="kt-menu__link-text">{{ "Прочее"|t }}</span>
+                {% dropdown-menu-sub-items %}
+                {% menu-item staff.response/index %}
+                <span class="kt-menu__link-text">{{ "Причины отклонений"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item inspector.article/index %}
+                <span class="kt-menu__link-text">{{ "Статьи"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item misc/faq %}
+                <span class="kt-menu__link-text">{{ "Вопросы"|t }}</span>
+                {% end-menu-item %}
+                {% end-dropdown-menu-item %}
+              </ul>
+            </div>
+          </div>
+          {% endifequal %}
+
+          {% ifequal request.identity.role "citizen" %}
+          <div class="kt-header-menu-wrapper kt-grid__item kt-grid__item--fluid"
+               id="kt_header_menu_wrapper">
+            <div id="kt_header_menu" class="kt-header-menu kt-header-menu-mobile ">
+              <ul class="kt-menu__nav">
+                {% menu-item citizen.report/index %}
+                <span class="kt-menu__link-text">{{ "Видеозаписи"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item citizen.offense/index %}
+                <span class="kt-menu__link-text">{{ "Правонарушения"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item citizen.profile/edit %}
+                <span class="kt-menu__link-text">{{ "Профиль"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item citizen.apps/list %}
+                <span class="kt-menu__link-text">{{ "Приложения"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item citizen.organization/index %}
+                <span class="kt-menu__link-text">{{ "Юрлица"|t }}</span>
+                {% end-menu-item %}
+                {% menu-item misc/faq %}
+                <span class="kt-menu__link-text">{{ "Вопросы"|t }}</span>
+                {% end-menu-item %}
+              </ul>
+            </div>
+          </div>
+          {% endifequal %}
+
+          <div class="kt-header__topbar kt-grid__item">
+            {% ifequal request.identity.role "citizen" %}
+            {% if not all request.identity.password %}
+            <div class="kt-header__topbar-item kt-header__topbar-item--user">
+              <div class="kt-header__topbar-wrapper" data-toggle="dropdown"
+                   data-offset="10px,0px">
+                  <span class="kt-header__topbar-icon kt-pulse kt-pulse--brand">
+                    <i class="la la-bell-o"></i>
+                    <span class="kt-pulse__ring"></span>
+                  </span>
+              </div>
+              <div class="dropdown-menu dropdown-menu-fit dropdown-menu-right dropdown-menu-anim dropdown-menu-xl">
+
+                <div class="kt-head kt-head--skin-dark"
+                     style="background-image: url(/img/header-dropdown-bg.jpg)">
+                  <h3 class="kt-head__title">
+                    {{ "Уведомления"|t }}
+                    <span class="kt-space-15"></span>
+                  </h3>
+                </div>
+                {% if not request.identity.password %}
+                <div class="kt-notification">
+                  <a href="{% path misc/change-password %}" class="kt-notification__item"
+                     data-title="password">
+                    <div class="kt-notification__item-icon">
+                      <i class="flaticon2-lock kt-font-success"></i>
+                    </div>
+                    <div class="kt-notification__item-details">
+                      <div class="kt-notification__item-title kt-font-bold">
+                        {{ "Авторизация без смс"|t }}
+                      </div>
+                      <div class="kt-notification__item-time">
+                        {{ "Теперь можно добавить пароль"|t }}
+                      </div>
+                    </div>
+                  </a>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+            {% endifequal %}
+
+
+            {% language-bar %}
+
+            {% if request.identity %}
+            <div class="kt-header__topbar-item kt-header__topbar-item--user">
+              <div class="kt-header__topbar-wrapper" data-toggle="dropdown" data-offset="10px,0px">
+                <span class="kt-header__topbar-username">{{ request.identity.first_name }}</span>
+                <span class="kt-header__topbar-icon"><i class="la la-user"></i></span>
+              </div>
+              <div class="dropdown-menu dropdown-menu-fit dropdown-menu-right dropdown-menu-anim dropdown-menu-xl">
+                <div class="kt-user-card kt-user-card--skin-dark kt-notification-item-padding-x"
+                     style="background-image: url(/img/header-dropdown-bg.jpg)">
+                  <div class="kt-user-card__avatar">
+                    <span class="kt-badge kt-badge--lg kt-badge--rounded kt-badge--bold kt-font-success">
+                      <i class="la la-user pl-1"></i>
+                    </span>
+                  </div>
+                  <div class="kt-user-card__name">
+                    {{ request.identity.first_name }} {{ request.identity.last_name }}
+                  </div>
+                </div>
+                <div class="kt-notification">
+                  <a href="{% path misc/change-password %}" class="kt-notification__item">
+                    <div class="kt-notification__item-icon">
+                      <i class="flaticon2-lock kt-font-success"></i>
+                    </div>
+                    <div class="kt-notification__item-details">
+                      <div class="kt-notification__item-title kt-font-bold">
+                        {{ "Безопасность"|t }}
+                      </div>
+                      <div class="kt-notification__item-time">
+                        {{ "Изменить пароль авторизации"|t }}
+                      </div>
+                    </div>
+                  </a>
+                  {% ifequal request.identity.role "inspector" %}
+                  <a href="{% path staff.reward/update %}" class="kt-notification__item">
+                    <div class="kt-notification__item-icon">
+                      <i class="fa fa-credit-card kt-font-success"></i>
+                    </div>
+                    <div class="kt-notification__item-details">
+                      <div class="kt-notification__item-title kt-font-bold">
+                        {{ "Профиль"|t }}
+                      </div>
+                      <div class="kt-notification__item-time">
+                        {{ "Изменение карты для вознаграждений"|t }}
+                      </div>
+                    </div>
+                  </a>
+                  {% endifequal %}
+                  <div class="kt-notification__custom">
+                    <form method="post" action="/logout">
+                      {% csrf-field %}
+                      <button class="btn btn-label-brand btn-sm btn-bold">
+                        {{ "Выход"|t }}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% block full-content %}
+      <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--ver kt-grid--stretch">
+        <div class="kt-container kt-body  kt-grid kt-grid--ver" id="kt_body">
+          <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor">
+            {% warn-unsupported-card %}
+
+            {% block sub-header %}
+            <div class="kt-subheader kt-grid__item" id="kt_subheader">
+              <div class="kt-subheader__main">
+                <h3 class="kt-subheader__title">{% block sub-header-title %}{% endblock %}</h3>
+                <h4 class="kt-subheader__desc">{% block sub-header-sub-title %}{% endblock %}</h4>
+              </div>
+              {% block sub-header-toolbar %}{% endblock %}
+            </div>
+            {% endblock %}
+            <div class="kt-content kt-grid__item kt-grid__item--fluid" id="content-container">
+              {% if request.identity %}
+              {% if not any request.identity.password request.disabled_alerts|get:"password" %}
+              <div class="alert w-100 alert-info fade show">
+                <div class="alert-icon"><i class="flaticon-warning"></i></div>
+                <div class="alert-text">
+                  <h5 class="alert-heading">{{ "Авторизация без смс"|t }}</h5>
+                  <div>{{ "Теперь можно добавить пароль, чтобы заходить без отправки смс"|t }}</div>
+                </div>
+                <div class="alert-close">
+                  <a class="close" data-redirect="{% path misc/change-password %}"
+                     aria-label="Close"
+                     data-title="password" data-dismiss="alert">
+                    <span aria-hidden="true"><i class="la la-edit"></i></span>
+                  </a>
+                </div>
+                <div class="alert-close">
+                  <button type="button" class="close" data-title="password"
+                          data-dismiss="alert"><span><i
+                    class="la la-close"></i></span></button>
+                </div>
+              </div>
+              {% endif %}
+              {% endif %}
+              {% if request.flash.alert.warning %}
+              <div class="alert w-100 alert-warning fade show">
+                <div class="alert-icon"><i class="flaticon-warning"></i></div>
+                <div class="alert-text">{{ request.flash.alert.warning }}</div>
+                <div class="alert-close">
+                  <button type="button" class="close" data-dismiss="alert"><span><i
+                    class="la la-close"></i></span></button>
+                </div>
+              </div>
+              {% endif %}
+              {% if request.flash.alert.success %}
+              <div class="alert w-100 alert-success fade show">
+                <div class="alert-icon"><i class="flaticon-success"></i></div>
+                <div class="alert-text">{{ request.flash.alert.success }}</div>
+                <div class="alert-close">
+                  <button type="button" class="close" data-dismiss="alert"><span><i
+                    class="la la-close"></i></span></button>
+                </div>
+              </div>
+              {% endif %}
+              {% block content %}{% endblock %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endblock %}
+
+      <div class="kt-footer  kt-footer--extended  kt-grid__item" id="kt_footer">
+        <div class="kt-footer__bottom">
+          <div class="kt-container">
+            <div class="kt-footer__wrapper">
+              <div class="kt-footer__logo">
+                <a class="kt-header__brand-logo align-self-start" href="/">
+                  <img alt="Logo" src="/img/logo.svg" class="kt-header__brand-logo-sticky"
+                       style="height: 30px">
+                </a>
+                <div class="kt-footer__copyright">
+                  videoJarima © {% now yyyy %}. {{ "Все права защищены."|t }} <a
+                  href="{% path misc/terms %}">{{ "Публичная оферта"|t }}</a>
+                  <br> {{ "Система была создана в партнерстве с <a href='http://www.uz.undp.org/content/uzbekistan/ru/home.html' title='Программа Развития Организации Объединённых Наций'>ПРООН</a> при финансовой поддержке посольства Великобритании в Ташкенте компанией ООО Kash App."|t }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

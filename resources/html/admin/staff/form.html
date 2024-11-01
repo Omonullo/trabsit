@@ -1,0 +1,167 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{% if staff.id %}{{ staff.first_name }} {{ staff.middle_name }} {{ staff.last_name }}{% else %}Новый пользователь{% endif %}{% endblock %}
+{% block sub-header-title %}{% if staff.id %}{{ staff.first_name }} {{ staff.middle_name }} {{ staff.last_name }}{% else %}Новый пользователь{% endif %}{% endblock %}
+{% block sub-header-sub-title %}{% if staff.id %}{{ "Редактирование пользователя"|t}}{% else %}{{ "Создание пользователя"|t}}{% endif %}{% endblock %}
+
+{% block floor %}
+<script>
+  $(function () {
+    $('select[name=role]').on('change', function () {
+      if ($(this).val() === 'inspector') {
+        $('#staff-region, #staff-active, #staff-review-allowed').slideDown();
+      } else {
+        $('#staff-region, #staff-active, #staff-review-allowed').slideUp();
+      }
+    });
+    $('input[name*=phone]').each(function (_, el) {
+      new IMask(el, {mask: '+998 00 000 00 00', definitions: {'9': /9/, '8': /8/}})
+    });
+  })
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet kt-portlet--height-fluid">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">{% if staff.id %}{{ staff.first_name }} {{ staff.middle_name }} {{ staff.last_name }}{% else %}Новый пользователь{% endif %}</h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form pt-4 pb-4" method="post">
+      {% csrf-field %}
+      <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+          <div class="kt-section kt-section--first">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Системные данные"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Роль"|t }}</label>
+                <div class="col-md-9">
+                  <select class="form-control" name="role">
+                    <option value="admin" {% ifequal staff.role "admin" %} selected {% endifequal %}> {{ "Администратор"|t }}
+                    </option>
+                    <option value="inspector" {% ifequal staff.role "inspector" %} selected {% endifequal %}> {{ "Инспектор"|t }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div id="staff-region" style="{% ifequal staff.role "inspector" %}{% else %} display: none {% endifequal %}">
+                <div class="form-group row">
+                  <label class="col-md-3 col-form-label">{{ "Город или область"|t }}</label>
+                  <div class="col-md-9">
+                    {% area-select area_id false @staff.area_id %}
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 col-form-label">{{ "Район"|t }}</label>
+                  <div class="col-md-9">
+                    {% district-select district_id false @staff.district_id %}
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Имя пользователя"|t }}</label>
+                <div class="col-md-9">
+                  <input type="text" class="form-control" {% if staff.id %} disabled value="{{ staff.username }}" {% else %} required name="username"{% endif %}/>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Пароль"|t }}</label>
+                <div class="col-md-9">
+                  <input type="text" class="form-control" name="password"/>
+                </div>
+              </div>
+              <div id="staff-active" class="form-group row" style="{% ifequal staff.role "inspector" %}{% else %} display: none {% endifequal %}">
+                <div class="col-md-3">{{ "Активный"|t }}</div>
+                <div class="col-sm-9">
+                  <label class="kt-checkbox kt-checkbox--danger mb-4">
+                    <input class="form-check-input" type="checkbox" name="active" {% if staff.active %} checked {% endif %}>
+                    <span></span>
+                  </label>
+                </div>
+              </div>
+              <div id="staff-review-allowed" class="form-group row" style="{% ifequal staff.role "inspector" %}{% else %} display: none {% endifequal %}">
+                <div class="col-md-3">{{ "Разрешить рассмотрение"|t }}</div>
+                <div class="col-sm-9">
+                  <label class="kt-checkbox kt-checkbox--danger mb-4">
+                    <input class="form-check-input" type="checkbox" name="review_allowed" {% if staff.review_allowed %} checked {% endif %}>
+                    <span></span>
+                  </label>
+                </div>
+              </div>
+              <div id="staff-two-factor=enabled" class="form-group row">
+                <div class="col-md-3">{{ "Включить 2FA"|t }}</div>
+                <div class="col-sm-9">
+                  <label class="kt-checkbox kt-checkbox--danger mb-4">
+                    <input class="form-check-input" type="checkbox" name="two_factor_enabled" {% if staff.two_factor_enabled %} checked {% endif %}>
+                    <span></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="kt-section">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Личные данные"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Имя"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="first_name" required value="{{ staff.first_name }}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Фамилия"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="last_name" required value="{{staff.last_name}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Отчество"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="middle_name" required value="{{staff.middle_name}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Звание"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="rank" required value="{{staff.rank}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Номер телефона"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control" type="tel" name="phone" required value="{{staff.phone}}" pattern="\+998 \d{2} \d{3} \d{2} \d{2}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Публичный номер"|t }}
+                </label>
+                <div class="col-md-9">
+                  <input class="form-control" type="tel" name="public_phone" required value="{{staff.public_phone}}" pattern="\+998 \d{2} \d{3} \d{2} \d{2}">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-9">
+                  <button type="submit" class="btn btn-success mr-2">{{ "Сохранить"|t }}</button>
+                  <button type="reset" class="btn btn-secondary" onclick="history.go(-1)">{{ "Назад"|t }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2"></div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

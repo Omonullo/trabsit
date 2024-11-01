@@ -1,0 +1,84 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}
+  {{ "Приложения"|t }}
+{% endblock %}
+
+{% block sub-header-title %}
+  {{ "Приложения"|t }}
+{% endblock %}
+
+{% block sub-header-sub-title %}
+  {{ "Приложения имеющие доступ к вашему аккаунту"|t }}
+{% endblock %}
+
+{% block roof %}
+  <style>
+    .kt-portlet__body > .table {
+      min-width: 800px;
+    }
+
+    th {
+      font-weight: 500;
+    }
+
+    .kt-portlet__body {
+      overflow-x: auto;
+    }
+  </style>
+{% endblock %}
+
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Выданные токены"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body flex-grow-1">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>{{ "Приложение"|t }}</th>
+        <th>{{ "Права"|t }}</th>
+        <th>{{ "Создан"|t }}</th>
+        <th>{{ "Обновлён"|t }}</th>
+        <th class="text-right">{{ "Действие"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for token in tokens %}
+      <tr>
+        <td><a href="{{ token.client_url }}">{{ token.client_name }}</a></td>
+        <td>
+            {% for id, scope in token.scope|match-scope:@request.identity.role %}
+              <span class="kt-badge kt-badge--inline kt-badge--brand mr-2 my-1">
+                <i class="{{ scope.icon }}"></i>
+                {{ scope.name }}
+              </span>
+            {% endfor %}
+        </td>
+        <td> {{ token.create_time|local-date-time }}</td>
+        <td> {{ token.refresh_time|local-date-time }}</td>
+        <td class="text-right">
+          <form class="d-inline" method="post" action="{% path oauth/revoke %}">
+            <input type="hidden" name="token_id" value="{{ token.id }}">
+            {% csrf-field %}
+            <button class="btn btn-sm btn-clean btn-icon btn-icon-md confirm-click"
+                    title="{{ "Аннулировать"|t }}"
+                    data-confirmation='{{ "Приложение %s потеряет доступ, вы уверены?"|t:@token.client_name }}'>
+              <i class="la la-remove"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

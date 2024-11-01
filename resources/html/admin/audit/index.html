@@ -1,0 +1,49 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Аудит"|t }}{% endblock %}
+{% block sub-header-title %}{{ "Аудит"|t }}{% endblock %}
+{% block sub-header-sub-title %}{{ "Журнал авторизации"|t }}{% endblock %}
+
+
+{% block roof %}
+<style>
+  #log {
+    font-family: monospace;
+    white-space: nowrap;
+    width: 100%;
+    overflow-x: scroll;
+    font-size: 14px;
+    padding: .75rem;
+    margin-top: 10px;
+    line-height: 1.2;
+    border: 1px solid rgba(0, 0, 0, .1);
+    border-radius: .25rem;
+  }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Журнал"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <div class="mb-2">
+      <a href="?page=1" class="btn btn-default"><i class="la la-arrow-up"></i> {{ "В конец"|t }}</a>
+      <a href="?page={{ page|add:1 }}" class="btn btn-default" {% if last-page?  %} disabled {% endif %}><i class="la la-arrow-right"></i>  {{ "Предыдущий"|t }}</a>
+    </div>
+
+    {% empty-wrapper rows %}
+    <textarea id="log" rows="{{ rows|count }}">{% for row in rows %}{{ row.text }}
+{% empty %}
+-- нет данных --
+{% endfor %}</textarea>
+    {% end-empty-wrapper %}
+  </div>
+</div>
+{% endblock %}

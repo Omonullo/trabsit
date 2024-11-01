@@ -1,0 +1,373 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Видеозапись"|t }} №{{ report.number }}{% endblock %}
+{% block sub-header-title %}
+{{ "Видеозапись"|t }} №{{ report.number }}
+{% endblock %}
+
+{% block roof %}
+  <style>
+    .offense__img img {
+      height: 5rem;
+      object-fit: contain;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+  </style>
+{% endblock %}
+
+
+{% block floor %}
+  <script>
+    function init_map() {
+      if ($('#map').length) {
+        var center = $('#map').data('center').split(',');
+
+        var map = new ymaps.Map('map', {
+          center: center,
+          zoom: 14,
+          controls: ['typeSelector']
+        });
+
+        var marker = new ymaps.GeoObject(
+          {geometry: {type: "Point", coordinates: center}});
+
+        map.geoObjects.add(marker);
+      }
+    }
+
+    $(function () {
+      $('video').player();
+    });
+
+    $('input[name="reward_params[phone]"]').each(function (_, el) {
+      new IMask(el, {mask: '+998 00 000 00 00', definitions: {'9': /9/, '8': /8/}})
+    });
+
+    $('input[name="reward_params[card]"]').card();
+
+    $(':input[name=type]').on('change', function (event) {
+      $(':input[name*=params]').prop('disabled', true).prop('required', false).closest('.row').hide();
+      $(`:input[name="reward_params[${event.target.value}]"]`).prop('disabled', false).prop('required', true).closest('.row').show();
+    }).trigger('change');
+  </script>
+{% endblock %}
+
+
+{% block content %}
+  <div class="kt-portlet kt-portlet--tabs">
+    <div class="kt-portlet__head kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ report.status|report-status-color }} pr-0">
+      <div class="kt-portlet__head-toolbar">
+        <ul class="nav nav-tabs nav-tabs-line nav-tabs-line-success">
+          <li class="nav-item">
+            <a class="nav-item nav-link active"
+               id="nav-home-tab"
+               data-toggle="tab"
+               data-tab="video"
+               href="#nav-video">
+              <i class="flaticon2-photo-camera"></i>
+              {% video_title @report.extra_video @report.extra_video_type%}
+            </a>
+          </li>
+          {% if report.extra_video %}
+            <li class="nav-item">
+              <a class="nav-item nav-link"
+                 id="nav-profile-tab"
+                 data-toggle="tab"
+                 data-tab="extra-video"
+                 href="#nav-extra-video">
+                <i class="flaticon2-photo-camera"></i>
+                {% if report.extra_video_type %}
+                  {{ report.extra_video_type|t }}
+                {% else %}
+                  {{ "Второе видео"|t }}
+                {% endif %}
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="kt-portlet__head-toolbar align-items-center">
+        <div class="kt-ribbon__target">
+          <span class="kt-ribbon__inner"></span>
+          {{ report.status|report-status-name|t }}
+        </div>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="nav-video">
+          <div class="d-flex flex-column">
+            {% if report.video %}
+              <video crossorigin="anonymous">
+                <source src="{{ report.video.url }}" data-download-url="{{ report.video.download-url }}"
+                        type="{{ report.video.content-type }}">
+              </video>
+            {% else %}
+              <div class="text-center my-5">
+                <i class="flaticon-warning-sign" style="font-size: 5rem"></i>
+                <p>{{ "Данное видео было заархивированно, обратитесь в тех поддержку чтобы получить больше информации"|t }}</p>
+                <a class="btn btn-outline-secondary btn-sm mt-2" href="mailto:salom@kash.uz" onclick="navigator.clipboard.writeText('salom@kash.uz')">salom@kash.uz</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        {% if report.extra_video %}
+          <div class="tab-pane fade" id="nav-extra-video">
+            <div class="d-flex flex-column">
+              <video crossorigin="anonymous">
+                <source src="{{ report.extra_video.url }}" data-download-url="{{ report.extra_video.download-url }}"
+                        type="{{ report.extra_video.content-type }}">
+              </video>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet kt-portlet--tabs">
+    <div class="kt-portlet__head">
+      <div class="kt-portlet__head-toolbar">
+        <ul class="nav nav-tabs nav-tabs-line nav-tabs-line-success">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#report-info-content">
+              <i class="flaticon-notes"></i>
+              {{ "Детали"|t }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#location-content" id="location-tab">
+              <i class="flaticon-placeholder"></i>
+              {{ "Карта"|t }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#reward-content" id="reward-tab">
+              <i class="flaticon-coins"></i>
+              {{ "Настройка вознаграждения"|t }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <div class="tab-content">
+        <div class="tab-pane active" id="report-info-content">
+          <div class="accordion accordion-light" id="offense-accordion">
+            <div class="row">
+              <div class="col-md-6 col-sm-12">
+                <div>
+                  <div class="kt-label-font-color-2">
+                    {{ "Место события"|t }}
+                  </div>
+                  <div>
+                    <a href="#location-content" onclick="$('#location-tab').tab('show')">
+                      {{ report|address }}
+                    </a>
+                  </div>
+                  <div class="mt-3">
+                    <div class="kt-label-font-color-2">
+                      {{ "Общие данные вознаграждения"|t }}
+                    </div>
+                    <div class="kt-label-font-color-3">
+                        <span>{{ report.reward_params|reward-icon }}</span>
+                        <span>{{ report.reward_params|reward }}</span>
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <div class="kt-label-font-color-2">{{ "Время нарушения"|t }}</div>
+                    <div class="kt-label-font-color-3">{{ report.incident_time|local-date-time }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div>
+                  <div>
+                    <div class="kt-label-font-color-2">{{ "Время создания заявки"|t }}</div>
+                    <div class="kt-label-font-color-3">{{ report.create_time|local-date-time }}</div>
+                  </div>
+                  {% if report.review_time %}
+                  <div class="mt-3">
+                    <div class="kt-label-font-color-2">{{ "Время рассмотрения"|t }}</div>
+                    <div class="kt-label-font-color-3">{{ report.review_time|local-date-time }}</div>
+                  </div>
+                  {% endif %}
+                  {% if report.inspector %}
+                  {% if report.inspector.public_phone %}
+                  <div class="mt-3">
+                    <div class="kt-label-font-color-2">{{ "Номер для обращения"|t }}</div>
+                    <div class="kt-label-font-color-3">
+                      {{ report.inspector.public_phone|phone }}
+                    </div>
+                  </div>
+                  {% endif %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="location-content">
+          <div class="mb-5" style="height: 80vh" id="map" data-center="{{ report.lat }},{{ report.lng }}"></div>
+        </div>
+        <div class="tab-pane" id="reward-content">
+          <form method="post" action="{% path citizen.report/patch id @report.id %}" class="my-5">
+            {% csrf-field %}
+            <div class="row">
+              <div class="col-lg-2"></div>
+              <div class="col-lg-8">
+                <div class="form-group row">
+                  <label class="col-md-3 col-form-label">{{ "Вид вознаграждения"|t }}</label>
+                  <div class="col-md-9">
+                    <select required class="form-control" name="type">
+                      {% for type in reward_types %}
+                      <option value="{{ type.0 }}" {% ifequal type.0 report.reward_type %} selected {% endifequal %} >{{ type.1.name|t }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row" style="display: none">
+                  <label class="col-md-3 col-form-label">{{ "Номер телефона"|t }}</label>
+                  <div class="col-md-9">
+                    <input type="text" name="reward_params[phone]" class="form-control" value="{{ report.reward_params.phone|default:@request.identity.phone }}">
+                  </div>
+                </div>
+                <div class="form-group row" style="display: none">
+                  <label class="col-md-3 col-form-label">{{ "Номер карты"|t }}</label>
+                  <div class="col-md-9">
+                    <input type="text" name="reward_params[card]" class="form-control" value="{{ request.identity.card }}" pattern="8600 \d{4} \d{4} \d{4}">
+                    <span class="form-text text-primary"></span>
+                    <p>{{"Вознаграждения будут перечислены на банковскую карту, указанную в профиле. Процесс перевода средств осуществляется ежедневно на основе совокупности всех зачислений, подлежащих выплате на данный момент. Следовательно, все начисленные вознаграждения за период будут объединены в один платеж."|t}}</p>
+                  </div>
+                </div>
+                <div class="form-group row" style="display: none">
+                  <label class="col-md-3 col-form-label">{{ "Благотворительный фонд"|t }}</label>
+                  <div class="col-md-9">
+                    <select class="form-control" name="reward_params[fund]">
+                      {% for fund in funds|keys %}
+                        <option {% ifequal report.reward_params.fund fund %} selected {% endifequal %} value="{{fund}}">
+                            {{ fund|t }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                      <div class="mt-2">
+                          <span>{{ "Информация о благотворительных фондах"|t }}:</span>
+                          <ul>
+                              {% for fundName in funds|keys %}
+                              <li>
+                                  <a target="_blank" href="{{funds|get:@fundName}}">{{ fundName|t }}</a>
+                              </li>
+                              {% endfor %}
+                          </ul>
+                      </div>
+                  </div>
+                </div>
+                <div class="form-group row" style="display: none">
+                  <label class="col-md-3 col-form-label">{{ "Юрлицо"|t }}</label>
+                  <div class="col-md-9">
+                    <select class="form-control" name="reward_params[bank]">
+                      {% for organization in organizations %}
+                      <option {% ifequal report.reward_params.bank organization.bank_account %} selected {% endifequal %} value="{{ organization.bank_account }}">{{ organization.name }} - {{ organization.bank_account }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <input type="hidden" name="reward_params[no-reward]" class="form-control" value="true" {% if not report.reward_params.no-reward %} disabled {% endif %}>
+                </div>
+                <div class="row">
+                  <div class="col-md-3">
+                  </div>
+                  <div class="col-md-9 d-flex flex-row align-items-center" >
+                    <button type="submit" class="btn btn-success mr-2">{{ "Сохранить"|t }}</button>
+                    <span class="text-muted">{{ "Не выплаченные вознаграждения будут запрошены повторно"|t }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% for offense in report.offenses %}
+    {% if not offense.creator_staff_id %}
+    <div class="kt-portlet kt-portlet--head kt-portlet--mobile offense" id="{{ offense.number }}">
+        <div class="kt-portlet__head kt-portlet__head--noborder  kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ offense.status|offense-status-color }} pr-0">
+          <div class="kt-portlet__head-label">
+            <h3 class="kt-portlet__head-title">{{ "Нарушение"|t }} №{{ offense.number }}</h3>
+          </div>
+          <div class="kt-portlet__head-toolbar">
+            <div class="kt-ribbon__target">
+              <span class="kt-ribbon__inner"></span>
+              {{ offense.status|offense-status-name|t }}
+            </div>
+          </div>
+        </div>
+        <div class="kt-portlet__body kt-portlet__body--fit-top pt-1">
+          <div class="row">
+            <div class="col-lg-6 col-md-12">
+              <div class="kt-font-bold kt-label-font-color-2">
+                {{ "Номер транспорта"|t }}
+              </div>
+              <span class="vehicle_id vehicle_id-sm mt-1">{{ offense.vehicle_id }}</span>
+
+              <div class="mt-3">
+                <div class="kt-font-bold kt-label-font-color-2">{{ "Описание"|t }}</div>
+                {{ offense.testimony }}
+              </div>
+
+              {% if offense.type_name %}
+                <div class="kt-font-bold kt-label-font-color-2">
+                  {{ "Тип нарушения выбранный гражданином"|t }}
+                </div>
+                <span class="mt-1">{{ offense.type_name }}</span>
+              {% endif %}
+
+              {% if any offense.accept_time offense.reject_time %}
+              <div class="mt-3">
+                <div class="kt-font-bold kt-label-font-color-2">{{ "Принятые меры"|t }}</div>
+                {% offense-taken-measures @offense %}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-lg-6 col-md-12">
+              {% if any offense.pay_time offense.dismiss_time %}
+                <div class="kt-font-bold kt-label-font-color-2">
+                  {{ "Дата получения ответа о состоянии"|t }}
+                </div>
+                <div class="kt-label-font-color-3">
+                  {{ offense.pay_time|local-date-time }} {{ offense.dismiss_time|local-date-time }}
+                </div>
+              {% endif %}
+
+              {% if offense.reward %}
+              <div class="mt-3">
+                <div class="kt-label-font-color-2">
+                  {{ "Данные вознаграждения"|t }}
+                </div>
+                <div class="kt-label-font-color-3">
+                  {{ offense.reward.params|reward }}
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <div class="kt-label-font-color-2">
+                  {{ "Статус вознаграждения"|t }}
+                </div>
+                <div class="kt-label-font-color-3">
+                  <span class="kt-font-{{ offense.reward.status|reward-status-color }}">
+                    {{ offense.reward.status|reward-status-name|t }}
+                  </span>
+                  {{ offense.reward.amount|money }} {{ "сум"|t }}
+                </div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endblock %}

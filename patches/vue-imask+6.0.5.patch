@@ -1,0 +1,38 @@
+diff --git a/node_modules/vue-imask/dist/vue-imask.js b/node_modules/vue-imask/dist/vue-imask.js
+index 1353d4f..b6f4f62 100644
+--- a/node_modules/vue-imask/dist/vue-imask.js
++++ b/node_modules/vue-imask/dist/vue-imask.js
+@@ -94,11 +94,11 @@
+       _onAccept: function _onAccept() {
+         var val = this._maskValue();
+ 
+-        this.$emit('input', val);
+-        this.$emit('accept', val);
++        this.$emit('input', val, this.maskRef);
++        this.$emit('accept', val, this.maskRef);
+       },
+       _onComplete: function _onComplete() {
+-        this.$emit('complete', this._maskValue());
++        this.$emit('complete', this._maskValue(), this.maskRef);
+       },
+       _initMask: function _initMask() {
+         var maskOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.maskOptions;
+diff --git a/node_modules/vue-imask/esm/component.js b/node_modules/vue-imask/esm/component.js
+index 6e5360a..a7f51bf 100644
+--- a/node_modules/vue-imask/esm/component.js
++++ b/node_modules/vue-imask/esm/component.js
+@@ -88,11 +88,11 @@ var IMaskComponent = {
+     _onAccept: function _onAccept() {
+       var val = this._maskValue();
+ 
+-      this.$emit('input', val);
+-      this.$emit('accept', val);
++      this.$emit('input', val, this.maskRef);
++      this.$emit('accept', val, this.maskRef);
+     },
+     _onComplete: function _onComplete() {
+-      this.$emit('complete', this._maskValue());
++      this.$emit('complete', this._maskValue(), this.maskRef);
+     },
+     _initMask: function _initMask() {
+       var maskOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.maskOptions;

@@ -1,0 +1,76 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}
+  {{ "Тип нарушений"|t }}
+{% endblock %}
+
+{% block sub-header-title %}
+  {{ "Тип нарушений"|t }}
+{% endblock %}
+
+{% block sub-header-sub-title %}
+  {{ "Выбор гражданином типа нарушения при отправке видео"|t }}
+{% endblock %}
+
+{% block sub-header-toolbar %}
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <a href="{% path admin.offense-type/create %}" class="btn btn-ment kt-subheader__btn-options">
+      <i class="la la-cloud-upload"></i>
+      {{ "Добавить"|t }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Тип нарушений"|t }}
+
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>{{ "Номер"|t }}</th>
+        <th>{{ "Текст"|t }}</th>
+        <th class="text-right">{{ "Действие"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for offense-type in offense-types %}
+      <tr>
+        <td>{{ offense-type.id }}</td>
+        <td>
+          <div><span class="kt-font-success"> ru </span> {{ offense-type.name_ru }}</div>
+          <div><span class="kt-font-success"> uz </span> {{ offense-type.name_uz_la }}</div>
+          <div><span class="kt-font-success"> ўз</span> {{ offense-type.name_uz_cy }}</div>
+        </td>
+
+        <td class="text-right">
+          <a href="{% path admin.offense-type/edit id @offense-type.id %}"
+             class="btn btn-sm btn-clean btn-icon btn-icon-md"
+             title="{{ "Редактировать"|t }}">
+            <i class="la la-edit"></i>
+          </a>
+          <form class="d-inline" method="post" action="{% path admin.offense-type/delete id @offense-type.id %}">
+            {% csrf-field %}
+            <button class="btn btn-sm btn-clean btn-icon btn-icon-md confirm-click"
+                    data-confirmation='{{ "Вы точно хотите удалить этот тип?"|t }}'>
+              <i class="la la-remove"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

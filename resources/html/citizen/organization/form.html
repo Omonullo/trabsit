@@ -1,0 +1,112 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{organization.name|default:"Новое юрлицо" }}{% endblock %}
+{% block sub-header-title %}{{organization.name|default:"Новое юрлицо" }}{% endblock %}
+{% block sub-header-sub-title %}{{ "Редактирование юрлица"|t }} {% endblock %}
+
+{% block content %}
+
+<div class="kt-portlet kt-portlet--height-fluid">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">{{ "Данные юрлица"|t }}</h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form pt-4 pb-4" method="post">
+      {% csrf-field %}
+      <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+          <div class="kt-section kt-section--first">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Общие данные"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Название юрлица"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="name" required value="{{organization.name}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Форма собственности"|t }}</label>
+                <div class="col-md-9">
+                  <select class="form-control" name="type" required>
+                    <option value=""></option>
+                    {% for type in types %}
+                    <option value="{{ type.0 }}" {% ifequal organization.type type.0 %} selected {% endifequal %}>{{ type.1 }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "ИНН"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="inn" required value="{{organization.inn}}">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="kt-separator kt-separator--border-dashed kt-separator--space-lg"></div>
+          <div class="kt-section">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Адресные данные"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Город или область"|t }}</label>
+                <div class="col-md-9">
+                  {% area-select area_id false @organization.area_id %}
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Район"|t }}</label>
+                <div class="col-md-9">
+                  {% district-select district_id false @organization.district_id %}
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Поселок/Массив/Улица/Дом"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="address" value="{{organization.address}}">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Почтовый индекс"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="zipcode" value="{{organization.zipcode}}" maxlength="6">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="kt-separator kt-separator--border-dashed kt-separator--space-lg"></div>
+          <div class="kt-section kt-section--last">
+            <div class="kt-section__body">
+              <h3 class="kt-section__title kt-section__title-lg">{{ "Банковские реквизиты"|t }}</h3>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "Расчетный счет"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="bank_account" value="{{organization.bank_account}}" maxlength="20">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-3 col-form-label">{{ "МФО Банка"|t }}</label>
+                <div class="col-md-9">
+                  <input class="form-control" type="text" name="bank_mfo" value="{{organization.bank_mfo}}">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-9">
+                  <button type="submit" class="btn btn-success mr-2">{{ "Сохранить"|t }}</button>
+                  <button type="reset" class="btn btn-secondary" onclick="history.go(-1)">{{ "Назад"|t }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2"></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

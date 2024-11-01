@@ -1,0 +1,846 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Видеозапись"|t }} №{{ report.number }}{% endblock %}
+{% block sub-header-title %}{{ "Видеозапись"|t }} №{{ report.number }}{% endblock %}
+{% block sub-header-sub-title %}{{ "Рассмотрение видеозаписи"|t }} {% endblock %}
+
+{% block roof %}
+  <link rel="stylesheet" href="/npm/cropper/dist/cropper.min.css">
+  <style>
+
+    video {
+      max-height: 80vh;
+    }
+
+    .vehicle_id__prev {
+      width: 100%;
+    }
+
+    .article-select-modal {
+      padding: 0 25px !important;
+    }
+
+    .article-select-modal .modal-dialog {
+      max-width: 1500px;
+    }
+
+    .article-select-modal .modal-content {
+      max-width: 1500px;
+    }
+
+    .article-option.selected {
+      background: #5d78ff !important;
+      border-color: #5d78ff;
+    }
+
+    .article-option.selected .article-number, .article-option.selected .article-alias, .article-option.selected .article-factor {
+      color: white !important;
+    }
+
+    .article-option.selected .kt-label-font-color-1 {
+      color: #c7d0ff !important;
+    }
+
+
+    .article-option .article-alias {
+      color: #565656;
+    }
+
+    .article-option .article-factor {
+      color: #565656;
+      line-height: 1;
+    }
+
+    .article-option {
+      border: 2px solid #ebedf2;
+      border-radius: 4px;
+      padding: 1rem 1.2rem;
+      cursor: pointer;
+    }
+
+    .table thead > tr > td {
+      padding-bottom: 0.5rem;
+      vertical-align: top;
+      border-top: 0;
+      font-weight: 500;
+      color: #a7abc3;
+      white-space: nowrap;
+    }
+
+    .table tbody > tr {
+      border-bottom: 1px dashed #ebedf2;
+    }
+
+    .table tbody > tr > td {
+      border: 0;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      vertical-align: middle;
+      color: #6c7293;
+    }
+
+    .table tbody > td:first-child {
+      padding-left: 0;
+    }
+
+    .table tbody > td:last-child {
+      padding-right: 0;
+    }
+
+    .testimony {
+      display: flex;
+      align-items: center;
+      min-height: calc(2.7rem + 2px);
+    }
+
+    .offense__img img {
+      height: calc(2.6rem + 2px);
+      border-radius: 0.25rem 0 0 0.25rem;
+      width: 4rem;
+      object-fit: cover;
+      z-index: 2;
+    }
+
+    .offense__img button {
+      white-space: nowrap;
+    }
+
+    .offense__img__input {
+      opacity: 0;
+      transform: translateX(1.6rem) translateY(0.5rem);
+      pointer-events: none;
+      width: 1px;
+      position: absolute;
+    }
+
+    .select2-results__option--factor-0\.5 {
+      background: #FFF;
+      color: #646c9a;
+    }
+
+    .select2-results__option--factor-2 {
+      background: #FFF5F5;
+      color: #646c9a;
+    }
+
+    .select2-results__option--factor-3 {
+      background: #FED7D7;
+      color: #646c9a;
+    }
+
+    .select2-results__option--factor-5 {
+      background: #febdbd;
+      color: #646c9a;
+    }
+
+    .select2-results__option--factor-10 {
+      background: #fca9ac;
+      color: #fff;
+    }
+
+    .select2-results__option--factor-15 {
+      background: #f58787;
+      color: #fff;
+    }
+
+    .select2-results__option--factor-30 {
+      background: #e54f50;
+      color: #fff;
+    }
+
+    .select2-results__option.select2-results__option--highlighted  {
+      opacity: 0.7;
+    }
+  </style>
+{% endblock %}
+
+{% block floor %}
+  <script src="/npm/cropper/dist/cropper.min.js"></script>
+  <script src="/js/review.js"></script>
+{% endblock %}
+
+
+{% block content %}
+<div class="kt-portlet kt-portlet--tabs" id="video-content" data-report-id="{{ report.id }}">
+  <div class="kt-portlet__head kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ report.status|report-status-color }} pr-0">
+    <div class="kt-portlet__head-toolbar">
+      <ul class="nav nav-tabs nav-tabs-line nav-tabs-line-success">
+        <li class="nav-item">
+          <a class="nav-item nav-link active"
+             id="nav-home-tab"
+             data-toggle="tab"
+             data-tab="video"
+             href="#nav-video">
+            <i class="flaticon2-photo-camera"></i>
+             {% video_title @report.extra_video @report.extra_video_type%}
+          </a>
+        </li>
+        {% if report.extra_video %}
+          <li class="nav-item">
+            <a class="nav-item nav-link"
+               id="nav-profile-tab"
+               data-toggle="tab"
+               data-tab="extra-video"
+               href="#nav-extra-video">
+              <i class="flaticon2-photo-camera"></i>
+              {% if report.extra_video_type %}
+                {{ report.extra_video_type|t }}
+              {% else %}
+                {{ "Второе видео"|t }}
+              {% endif %}
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+    <div class="kt-portlet__head-toolbar align-items-center">
+      <div class="kt-ribbon__target">
+        <span class="kt-ribbon__inner"></span>
+        {{ report.status|report-status-name|t }}
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="nav-video">
+        <div class="d-flex flex-column">
+          {% if report.video %}
+            <video crossorigin="anonymous">
+              <source src="{{ report.video.url }}" data-download-url="{{ report.video.download-url }}"
+                      type="{{ report.video.content-type }}">
+            </video>
+          {% else %}
+            <div class="text-center my-5">
+              <i class="flaticon-warning-sign" style="font-size: 5rem"></i>
+              <p>{{ "Данное видео было заархивированно, обратитесь в тех поддержку чтобы получить больше информации"|t }}</p>
+              <a class="btn btn-outline-secondary btn-sm mt-2" href="mailto:salom@kash.uz" onclick="navigator.clipboard.writeText('salom@kash.uz')">salom@kash.uz</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% if report.extra_video %}
+        <div class="tab-pane fade" id="nav-extra-video">
+          <div class="d-flex flex-column">
+            <video crossorigin="anonymous">
+              <source src="{{ report.extra_video.url }}"
+                      data-download-url="{{ report.extra_video.download-url }}"
+                      type="{{ report.extra_video.content-type }}">
+            </video>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<form method="post" data-new-offense-title="{{ "Новое нарушение"|t }}" class="offenses">
+  {% csrf-field %}
+
+  <div class="kt-portlet kt-portlet--tabs">
+    <div class="kt-portlet__head">
+      <div class="kt-portlet__head-toolbar">
+        <ul class="nav nav-tabs nav-tabs-line nav-tabs-line-success">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#report-info-content">
+              <i class="flaticon-notes"></i>
+              {{ "Детали"|t }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#citizen-content" id="citizen-tab">
+              <i class="flaticon-user"></i>
+              {{ "Заявитель"|t }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#location-content" id="location-tab">
+              <i class="flaticon-placeholder"></i>
+              {{ "Карта"|t }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="kt-portlet__body">
+      <div class="tab-content">
+        <div class="tab-pane active" id="report-info-content">
+          <div class="accordion accordion-light" id="offense-accordion">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="kt-label-font-color-2">{{ "Заявитель"|t }}</div>
+                <div class="kt-label-font-color-3">
+                   <a href="#citizen-content" onclick="$('#citizen-tab').tab('show')">
+                     {% private %}
+                     {{ report.citizen.first_name }} {{ report.citizen.middle_name }} {{ report.citizen.last_name }}
+                     {% end-private %}
+                   </a>
+                </div>
+                <br>
+                <div class="kt-label-font-color-2">{{ "Время нарушения"|t }}</div>
+                <div class="kt-label-font-color-3">{{ report.incident_time|local-date-time }}</div>
+                <br>
+                <div class="kt-label-font-color-2 mb-1">{{ "Город или область"|t }}</div>
+                <div class="kt-label-font-color-3">{{ report.area_id|area-name }}</div>
+                <br>
+                <div class="kt-label-font-color-2 mb-1">{{ "Район"|t }}</div>
+                <div class="row">
+                  <div class="col-md-10">
+                    {% district-select district_id true @report.district_id %}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="kt-label-font-color-2">{{ "Вознаграждение"|t }}</div>
+                <div class="kt-label-font-color-3">
+                  {% ifequal request.identity.role "admin" %}
+                  {% if report.offense-rewards %}
+                    {% for reward in report.offense-rewards %}
+                      <div>
+                        <span>{{ reward|reward-icon }}</span>
+                        <span>{{ reward|reward }}</span>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <span>{{ report.reward_params|reward-icon }}</span>
+                    <span>{{ report.reward_params|reward }}</span>
+                  {% endif %}
+                  {% else %}
+                  {% if any report.reward_params.no-reward report.reward_params.fund %}
+                    <span>{{ report.reward_params|reward-icon }}</span>
+                    <span>{{ report.reward_params|reward }}</span>
+                  {% else %}
+                    <span class="kt-label-font-color-1">{{ "Скрыто"|t }}</span>
+                  {% endif %}
+                  {% endifequal %}
+                </div>
+                <br>
+                <div class="kt-label-font-color-2">{{ "Время создания заявки"|t }}</div>
+                <div class="kt-label-font-color-3">{{ report.create_time|local-date-time }}</div>
+                <br>
+                {% if report.creator_client_id %}
+                  {% with oauth_client=report.creator_client_id|oauth-client %}
+                    <div class="mt-3">
+                      <div class="kt-label-font-color-2">
+                        {{ "Источник заявки"|t }}
+                      </div>
+                      <div class="kt-label-font-color-3">
+                        <a href="{{ oauth_client.url }}">{{ oauth_client.name }}</a>
+                      </div>
+                    </div>
+                  {% endwith %}
+                {% endif %}
+                <div>
+                  <div class="kt-label-font-color-2">
+                    {{ "Другие видеозаписи"|t }}
+                  </div>
+                  <div class="kt-label-font-color-3">
+                    <a href="{% path staff.report/index ? point_radius @report.lat %},{{ report.lng }},0.5" target="_blank">
+                      {{ "В радиусе 500м (%s)"|t:@report.nearby_count }}</a>
+                  </div>
+                </div>
+                <br>
+                <div class="kt-label-font-color-2 mb-1 mt-1">{{ "Поселок/Массив/Улица/Дом"|t }}</div>
+                <div class="row">
+                  <div class="col-md-10">
+                    <input class="form-control" type="text" name="address" required
+                           value="{{ report.address }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="location-content">
+          <div class="mb-5" style="height: 80vh" id="map" data-center="{{ report.lat }},{{ report.lng }}"></div>
+        </div>
+        <div class="tab-pane" id="citizen-content">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="kt-label-font-color-2">{{ "Полное имя"|t }}</div>
+              <div class="kt-label-font-color-3">
+                {% private %}
+                {{ report.citizen.first_name }} {{ report.citizen.middle_name }} {{ report.citizen.last_name }}
+                {% end-private %}
+              </div>
+              <br>
+              <div class="kt-label-font-color-2">{{ "Номер телефона"|t }}</div>
+              <div class="kt-label-font-color-3">{% private %} {{ report.citizen.phone|phone }} {% end-private %}
+              </div>
+              <br>
+              {% if report.citizen.email %}
+                <div class="kt-label-font-color-2">{{ "Email адрес"|t }}</div>
+                <div class="kt-label-font-color-3">{% private %} {{ report.citizen.email }} {% end-private %}
+                </div>
+                <br>
+              {% endif %}
+              <div class="kt-label-font-color-2">{{ "Адрес"|t }}</div>
+              <div class="kt-label-font-color-3">{% private %} {{ report.citizen|address }} {% end-private %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="kt-label-font-color-2">{{ "Зарегистрирован"|t }}</div>
+              <div class="kt-label-font-color-3"> {{ report.citizen.create_time|local-date }}
+              </div>
+              <br>
+              <div class="kt-label-font-color-2">{{ "Всего видеозаписей"|t }}</div>
+              <div class="kt-label-font-color-3">
+                <a href="{% path staff.report/index ? citizen_id @report.citizen.id %}">
+                  {{report.citizen.stat.report-count }}
+                </a>
+              </div>
+              <br>
+              <div class="kt-label-font-color-2">{{ "Всего нарушений"|t }}</div>
+              <div class="kt-label-font-color-3">{{ report.citizen.stat.offense-count }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% for offense in report.offenses %}
+  {% if offense.forward_time %}
+  <div class="kt-portlet kt-portlet--head kt-portlet--mobile offense" id="{{ offense.number }}">
+    <div class="kt-portlet__head kt-portlet__head--noborder kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ offense.status|offense-status-color }} pr-0">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">{{ "Нарушение"|t }} №{{ offense.number }}</h3>
+      </div>
+      <div class="kt-portlet__head-toolbar">
+        {% if offense.asbt_log %}
+        <button type="button"
+                class="btn btn-sm btn-outline-info offense__log__btn"
+                data-offense-id="{{ offense.id }}"
+                data-toggle="modal"
+                data-target=".offense_asbt_log_modal">
+          {{ "Логи отправки"|t }}
+        </button>
+        {% endif %}
+        {% if offense.failure_message %}
+        {% ifequal offense.status "failed" %}
+        <form method="post" action="{% path staff.offense/reforward id @offense.id %}">
+          {% csrf-field %}
+          <button type="submit" class="btn btn-sm btn-outline-danger ml-2">
+            {{ "Отправить повторно"|t }}
+          </button>
+        </form>
+        {% endifequal %}
+        {% endif %}
+        <div class="kt-ribbon__target">
+          <span class="kt-ribbon__inner"></span>
+          {{ offense.status|offense-status-name|t }}
+        </div>
+      </div>
+    </div>
+    <div class="kt-portlet__body kt-portlet__body--fit-top pt-1">
+      <div class="row">
+        <div class="col-lg-6 col-md-12">
+          <div class="kt-font-bold kt-label-font-color-2">
+            {{ "Номер транспорта"|t }}
+          </div>
+          <span class="vehicle_id vehicle_id-sm mt-1">{{ offense.vehicle_id }}</span>
+
+          <div class="mt-3">
+            <div class="kt-font-bold kt-label-font-color-2">{{ "Описание"|t }}</div>
+            {% if offense.testimony %}
+            {{ offense.testimony }}
+            {% else %}
+            {{ "Без описания"|t }}
+            {% endif %}
+          </div>
+
+          {% if any offense.accept_time offense.reject_time %}
+          <div class="mt-3">
+            <div class="kt-font-bold kt-label-font-color-2">{{ "Принятые меры"|t }}</div>
+            {% offense-taken-measures @offense %}
+          </div>
+          {% endif %}
+
+          {% if any offense.vehicle_img offense.vehicle_id_img offense.extra_img %}
+          <div class="mt-3 offense__imgs">
+            <div class="kt-font-bold kt-label-font-color-2">{{ "Изображения"|t }}</div>
+            <div class="d-flex justify-content-start mt-2">
+              {% if offense.vehicle_img %}
+              <div class="mb-3">
+                <img src="{{ offense.vehicle_img }}" alt="">
+              </div>
+              {% endif %}
+              {% if offense.vehicle_id_img %}
+              <div class="ml-3 mb-3">
+                <img src="{{ offense.vehicle_id_img }}" alt="">
+              </div>
+              {% endif %}
+              {% if offense.extra_img %}
+              <div class="ml-3 mb-3">
+                <img src="{{ offense.extra_img }}" alt="">
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        <div class="col-lg-6 col-md-12">
+          <div>
+            <strong class=" kt-font-bold kt-label-font-color-2">
+              {{ "Код нарушения"|t }}
+            </strong>
+            <div>
+              {{ offense.id|guid }}
+            </div>
+          </div>
+          {% if offense.forward_time %}
+          <div class="mt-3">
+            <strong class=" kt-font-bold kt-label-font-color-2">
+              {{ "Дата отправки КСУБД"|t }}
+            </strong>
+            <div class="kt-label-font-color-3">{{ offense.forward_time|local-date-time }}</div>
+          </div>
+          {% endif %}
+          {% if offense.fine_id %}
+          <div class="mt-3">
+            <strong class="kt-font-bold kt-label-font-color-2">
+              {{ "Номер постановления"|t }}
+            </strong>
+            <div class="kt-label-font-color-3">{{ offense.fine_id }}</div>
+          </div>
+          {% endif %}
+          {% if offense.fine_date %}
+          <div class="mt-3">
+            <strong class="kt-font-bold kt-label-font-color-2">
+              {{ "Дата постановления"|t }}
+            </strong>
+            <div class="kt-label-font-color-3">{{ offense.fine_date|local-date }}</div>
+          </div>
+          {% endif %}
+          {% if any offense.pay_time offense.dismiss_time %}
+          <div class="mt-3">
+            <div class="mt-3 kt-font-bold kt-label-font-color-2">
+              {{ "Дата получения ответа от КСУБД о состоянии постановления"|t }}
+            </div>
+            <div class="kt-label-font-color-3">{{ offense.pay_time|local-date-time }}</div>
+            <div class="kt-label-font-color-3">{{ offense.dismiss_time|local-date-time }}</div>
+          </div>
+          {% endif %}
+          {% if offense.creator_staff_id %}
+            <div class="mt-3">
+              <div class="kt-font-bold kt-label-font-color-2">{{ "Создано инспектором"|t }}</div>
+              <div class="kt-label-font-color-3">
+                {{ offense.creator_staff.rank }}
+                {{ offense.creator_staff.first_name }} {{ offense.creator_staff.middle_name }} {{ offense.creator_staff.last_name }}
+                {% if offense.creator_staff.public_phone %} ({{ offense.creator_staff.public_phone|phone }}) {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if offense.accept_time %}
+          <div class="mt-3">
+            <div class="kt-font-bold kt-label-font-color-2">{{ "Публичная ссылка"|t }}</div>
+            <a href="{% path asbt/view id @offense.short-id %}" target="_blank">
+              {% path-abs asbt/view id @offense.short-id %}
+            </a>
+          </div>
+          {% endif %}
+          {% if offense.failure_time %}
+          <div class="mt-3">
+            <strong class=" kt-font-bold kt-label-font-color-2">
+              {{ "Время ошибки отправки КСУБД"|t }}
+            </strong>
+            <div class="kt-label-font-color-3">
+              {{ offense.failure_time|local-date-time }}
+            </div>
+          </div>
+          {% endif %}
+          {% if offense.failure_message %}
+          <div class="mt-3">
+            <strong class=" kt-font-bold kt-label-font-color-2">
+              {{ "Ошибка отправки КСУБД"|t }}
+            </strong>
+            <div class="kt-label-font-color-3">
+              {{ offense.failure_message }}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+
+  <div data-repeater-list="offenses">
+    {% for offense in report.offenses %}
+    {% if offense.forward_time %}{% else %}
+    <div class="kt-portlet offense" id="{{ offense.id }}" data-repeater-item {% if not offense %} style="display: none" {% endif %}>
+      <input type="hidden" name="id" value="{{ offense.id }}" required {% if not offense %} disabled {% endif %}>
+      <div class="kt-portlet__head kt-portlet__head--noborder kt-portlet__space-x">
+        <div class="kt-portlet__head-label">
+          <h3 class="kt-portlet__head-title">
+            {{ "Нарушение"|t }} №{{ offense.number }}
+          </h3>
+        </div>
+        <div class="kt-portlet__head-toolbar">
+          <div class="kt-portlet__head-actions">
+          </div>
+        </div>
+      </div>
+      <div class="kt-portlet__body kt-form kt-form--label-right">
+        <div class="form-group row mb-3">
+          <label class="col-form-label col-lg-3 col-md-3">
+            {{ "Номер транспорта"|t }}
+          </label>
+          <div class="col-lg-7 col-md-9 d-flex align-items-center">
+            <input type="text" class="vehicle_id" maxlength="12" placeholder="00 A 000 AA"
+                   disabled value="{{ offense.vehicle_id }}" name="vehicle_id" required {% if not offense %} disabled {% endif %}>
+            <a class="btn btn-link ml-2 vehicle-offenses-link text-danger" target="_blank"
+               href="{% path staff.offense/index ? vehicle_id @offense.vehicle_id exclude_report_id @report.id %}"
+                    {% if offense.vehicle-offense-count=0 %} style="display: none" {% endif %}>
+              {{ "Другие нарушения этого транспорта"|t }} ({{ offense.vehicle-offense-count }})
+            </a>
+            <span class="vehicle-offenses-zero text-muted ml-4" {% if not offense.vehicle-offense-count=0 %}
+              style="display: none" {% endif %}>
+              {{ "Других нарушений этого транспорта нет"|t }}
+            </span>
+          </div>
+        </div>
+        <div class="form-group row mb-3">
+          <label class="col-form-label col-lg-3 col-md-3">
+            {{ "Описание"|t }}
+          </label>
+          <div class="col-lg-7 col-md-9">
+            <div class="testimony">
+              {{ offense.testimony }}
+            </div>
+          </div>
+        </div>
+        <div class="form-group row mb-3">
+          <label class="col-form-label col-lg-3 col-md-3">
+            {{ "Статус"|t }}
+          </label>
+          <div class="col-lg-7 col-md-9">
+            <div class="kt-radio-list">
+              <label class="kt-radio kt-radio--bold">
+                <input required type="radio" name="status" value="rejected" {% if offense.reject_time %}
+                checked {% endif %} {% if not offense %} disabled {% endif %}>
+                {{ "Отклонить"|t }}
+                <span></span>
+              </label>
+              <label class="kt-radio kt-radio--bold">
+                <input required type="radio" name="status" value="accepted" {% if offense.accept_time %}
+                checked {% endif %} {% if not offense %} disabled {% endif %}>
+                {{ "Применить наказание"|t }}
+                <span></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="fields--accepted" style="display: none">
+          <div class="form-group row mb-3">
+            <label class="col-form-label col-lg-3 col-md-3">
+              {{ "Статья"|t }}
+            </label>
+            <div class="col-lg-7 col-md-9 pt-1">
+              <input type="text" style=" opacity: 0; position: absolute; width: 0;" name="article_id" class="article_id_input"
+                     required {% if offense.article_id %} value="{{ offense.article_id }}" {% endif %} {% if not offense %} disabled {% endif %}>
+              {% if offense.article_id %}
+                <div class="article-option article-select-btn">
+                  <div class="d-flex">
+                    <div class="text-right no-wrap mr-3">
+                      <div class="article-number kt-font-brand mb-1"
+                           style="font-size: 1.25em; line-height: 1">{{ offense.article_number }}</div>
+                      <div class="article-factor" style="line-height: 1">
+                        {{ offense.article_factor }} <span style="font-size: 0.75em"> {{ "МРЗП"|t }}</span>
+                      </div>
+                    </div>
+                    <div class="article-alias" style="line-height: 1.28">
+                      {{ offense|t-get:article-alias }}
+                      <div class="mt-1">{{ offense|t-get:article_text }}</div>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <button type="button" class="btn btn-sm btn-outline-secondary article-select-btn">
+                  {{ "Выберите статью"|t }}
+                </button>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group row mb-3" {% if offense.vehicle-offense-count = 0 %} style="display: none" {% endif %}>
+            <div class="col-lg-7 col-md-9 offset-lg-3 offset-md-3">
+              <label class="kt-checkbox mb-0">
+                <input type="checkbox"
+                       {% if not offense %} disabled {% endif %}
+                       name="not_duplicate"
+                       {% if offense.accept_time %} checked {% endif %}
+                       oninput="setCustomValidity('')"
+                       {% if offense.vehicle-offense-count = 0 %} data-optional {% else %} required {% endif %}
+                       oninvalid="this.setCustomValidity('{{ "Проверьте другие нарушения этого транспорта и убедитесь что нарушение не было отправленно повторно."|t }}')">
+                {{ "Нарушение не является дубликатом"|t }}
+                <span></span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-3 col-md-3">
+              {{ "Изображения"|t }}
+            </label>
+            <div class="col-lg-7 col-md-9 d-flex flex-wrap">
+              <div class="mr-2 mb-2 offense__img">
+                <input type="text" name="vehicle_img" class="offense__img__input" {% if offense.vehicle_img %} data-optional {% else %} required {% endif %} {% if not offense %} disabled {% endif %}/>
+                <div class="btn-group">
+                  {% if offense.vehicle_img %}
+                  <button type="button" class="btn btn-secondary p-0 offense__img__prev">
+                    <img src="{{ offense.vehicle_img }}">
+                  </button>
+                  {% endif %}
+                  <button type="button" class="btn btn-secondary offense__img__crop" data-area="1"
+                          title='{{ "Выберите изображение транспорта"|t }}'>
+                    {% if offense.vehicle_img %}{% else %}
+                    <i class="la la-image"></i>
+                    {% endif %}
+                    {{ "Транспортное средство"|t }}
+                  </button>
+                  <button type="button"
+                          class="btn btn-secondary px-2 offense__img__file"
+                          data-target="file-input">
+                    <i class="flaticon-attachment pr-1"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="mr-2 mb-2 offense__img">
+                <input type="text" name="vehicle_id_img" class="offense__img__input vehicle_id_img" {% if offense.vehicle_id_img %} data-optional {% else %} required {% endif %} {% if not offense %} disabled {% endif %}/>
+                <div class="btn-group">
+                  {% if offense.vehicle_id_img %}
+                    <button type="button" class="btn btn-secondary p-0 offense__img__prev">
+                      <img class="vehicle_id_img" src="{{ offense.vehicle_id_img }}">
+                    </button>
+                  {% endif %}
+                  <button type="button" class="btn btn-secondary offense__img__crop" data-ratio="4"
+                          title='{{ "Выберите изображение гос-номера транспорта"|t }}'>
+                    {% if offense.vehicle_id_img %}{% else %}
+                      <i class="la la-image"></i>
+                    {% endif %}
+                    {{ "Гос-номер"|t }}
+                  </button>
+                  <button type="button"
+                          class="btn btn-secondary px-2 offense__img__file"
+                          data-target="file-input">
+                    <i class="flaticon-attachment pr-1"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="fields--rejected" style="display: none">
+          <div class="form-group row mb-3">
+            <label class="col-form-label col-lg-3 col-md-3">
+              {{ "Причина отклонения"|t }}
+            </label>
+            <div class="col-lg-7 col-md-9">
+              <select class="form-control response-select"
+                      name="response_id"
+                      {% if not offense %} disabled {% endif %}
+                      required style="width: 100%"
+                      data-placeholder="{{ "Выберите причину отклонения"|t }}">
+                <option></option>
+                {% for response in responses %}
+              <option value="{{ response.id }}" {% ifequal response.id offense.response_id %} selected {% endifequal %}>
+                {{ response.number }} - {% if response|t-get:alias %} ({{ response|t-get:alias }}) {% endif %} {{ response|t-get:text }}
+              </option>
+                {% endfor %}
+              </select>
+
+              <label class="kt-checkbox mt-3">
+                <input type="checkbox" class="offense__response-toggler" {% if offense.extra_response %}
+                checked {% endif %}>
+                {{ "Ввести дополнительный текст для пояснения причины отклонения"|t }}
+                <span></span>
+              </label>
+
+              <textarea data-optional name="extra_response" class="form-control mt-2" rows="3" {% if not offense %} disabled {% endif %}
+                        placeholder="{{ "Дополнительный текст для пояснения причины отклонения"|t }}" {% if
+                not offense.extra_response %} style="display: none" {% endif %}>{{ offense.extra_response }}</textarea>
+              <div class="kt-portlet__head-toolbar mt-2">
+                <button type="button"
+                        class="btn btn-sm btn-outline-info offense__apply_all__btn"
+                        data-offense-id="{{ offense.id }}">
+                  {{ "Применить ко всем"|t }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  <div class="pull-right">
+    <button class="btn btn-ment" type="submit">
+      <i class="fa fa-check"></i>{{ "Завершить рассмотрение"|t }}
+    </button>
+  </div>
+  <div>
+    <button class="btn btn btn-primary" type="button" data-repeater-create>
+      <i class="fa fa-plus"></i>
+      {{ "Добавить новое нарушение"|t }}
+    </button>
+  </div>
+  <div class="modal fade vehicle-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ "Проверьте номера машин"|t }}</h5>
+        </div>
+        <div class="modal-body">
+          <div class="row justify-content-center vehicles" style="overflow-y: auto; max-height: 80vh"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ "Отмена"|t }}</button>
+          <button type="submit" class="btn btn-primary confirm-btn">{{ "Всё правильно" }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+<div class="modal fade article-select-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ "Выберите статью"|t }}</h5>
+      </div>
+      <div class="modal-body">
+        <div class="row flex-column" style="overflow-y: auto; max-height: 80vh">
+          {% for article in articles %}
+            <div class="col-lg-3 mb-3">
+                <div class="article-option"
+                     {% if article.factor %}
+                       {% with rediness=article.factor|multiply:4 %}
+                        style="background-color: rgb(255, {% substract 255 @rediness %},{% substract 255 @rediness %})"
+                       {% endwith %}
+                     {% endif %}
+                     data-id="{{ article.id }}" data-alias="{{ article|t-get:alias }}"
+                     data-number="{{ article.number }}" data-factor="{{ article.factor }}"
+                     data-text="{{ article|t-get:text }}">
+                <div class="d-flex">
+                  <div class="text-right no-wrap mr-3">
+                    <div class="article-number kt-font-brand mb-1" style="font-size: 1.25em; line-height: 1">{{ article.number }}
+                    </div>
+                    <div class="article-factor">
+                      {{ article.factor }} <span style="font-size: 0.75em"> {{ "МРЗП"|t }}</span>
+                    </div>
+
+                  </div>
+                  <div class="d-flex align-items-center article-alias" style="line-height: 1.28">
+                    {{ article|t-get:alias }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

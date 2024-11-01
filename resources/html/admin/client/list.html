@@ -1,0 +1,113 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}
+  {{ "Клиенты"|t }}
+{% endblock %}
+
+{% block sub-header-title %}
+  {{ "Клиенты"|t }}
+{% endblock %}
+
+{% block sub-header-sub-title %}
+  {{ "Клиентские приложения"|t }}
+{% endblock %}
+
+{% block sub-header-toolbar %}
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <a href="{% path admin.client/create %}" class="btn btn-ment kt-subheader__btn-options">
+      <i class="la la-cloud-upload"></i>
+      {{ "Добавить"|t }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+  <div class="kt-portlet">
+    <div class="kt-portlet__head kt-portlet__head--lg">
+      <div class="kt-portlet__head-label">
+        <h3 class="kt-portlet__head-title">
+          {{ "Приложения"|t }}
+        </h3>
+      </div>
+    </div>
+    <div class="kt-portlet__body">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>{{ "Название"|t }}</th>
+          <th>{{ "Разрешенные права"|t }}</th>
+          <th>{{ "Редирект линк"|t }}</th>
+          <th class="text-center">{{ "Тип гранта"|t }}</th>
+          <th class="text-center">{{ "Статус"|t }}</th>
+          <th class="text-right">{{ "Действие"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for client in clients %}
+        <tr>
+          <td>
+            <a href="{{ client.url }}"></a>
+            {{ client.name }}
+          </td>
+          <td>
+            {% for id, scope in client.allowed_scope|match-scope:@request.identity.role %}
+              <span class="kt-badge kt-badge--inline kt-badge--brand mr-2">
+                  <i class="{{ scope.icon }}"></i>
+                  {{ scope.name }}
+                </span>
+            {% endfor %}
+          </td>
+          <td>
+            {% if client.redirect_uri %}
+              <a href="{{ client.redirect_uri|first }}">
+                {{ client.redirect_uri|first }}
+              </a>
+            {% endif %}
+
+          </td>
+          <td>
+            <div class="kt-font-lg text-center">
+               <span class="kt-badge kt-badge--inline kt-badge--info mr-2">
+                   {% with grant=grant_types|get:@client.grant_type %}
+                       {{ grant.name }}
+                   {% endwith %}
+                 </span>
+            </div>
+          </td>
+          <td>
+            <div class="kt-font-lg text-center">
+              {% if client.enabled %}
+                <span class="kt-badge kt-badge--inline kt-badge--success mr-2">
+                 {{ "Включен"|t }}
+                 </span>
+              {% else %}
+                <span class="kt-badge kt-badge--inline kt-badge--danger mr-2">
+                    {{ "Выключен"|t }}
+                </span>
+              {% endif %}
+            </div>
+          </td>
+          <td class="text-right">
+            <a href="{% path admin.client/edit id @client.id %}"
+               class="btn btn-sm btn-clean btn-icon btn-icon-md"
+               title='{{ "Редактировать"|t }}'>
+              <i class="la la-edit"></i>
+            </a>
+            <form class="d-inline" method="post" action="{% path admin.client/delete id @client.id %}">
+              {% csrf-field %}
+              <button class="btn btn-sm btn-clean btn-icon btn-icon-md confirm-click"
+                      data-confirmation='{{ "Вы точно хотите удалить этого клиента?"|t }}'>
+                <i class="la la-remove"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% endblock %}

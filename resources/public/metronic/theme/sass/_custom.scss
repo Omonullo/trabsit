@@ -1,0 +1,5 @@
+@import "~bootstrap/scss/mixins/buttons";
+@import '~bootstrap-vue/src/index.scss';
+.btn-ment {
+  @include button-variant(#007566, #006658);
+}

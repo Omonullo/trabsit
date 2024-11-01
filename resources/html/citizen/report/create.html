@@ -1,0 +1,36 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Новая видеозапись"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Новая видеозапись"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "Загружайте видеофайлы на которых зафиксированы правонарушения"|t }} {% endblock %}
+
+{% block roof %}
+  <link href="/css/upload.css" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="/npm/vue-select/dist/vue-select.css">
+{% endblock %}
+
+
+{% block floor %}
+  {% json-dump areas @areas %}
+  {% json-dump articles @articles %}
+  {% json-dump profile @profile %}
+  {% json-dump funds @funds %}
+  {% json-dump offenseTypes @offense-types %}
+  {% json-dump organizations @organizations %}
+  {% json-dump rewardTypes @reward-types %}
+  {% if not limit-exceeded %}
+    <script src="/js/report.js" type="text/javascript"></script>
+  {% endif %}
+  {% endblock %}
+
+
+{% block content %}
+  {% csrf-field %}
+  {% if limit-exceeded %}
+    <div class="h-100 d-flex align-items-center justify-content-center">
+      <h3 class="kt-subheader__title btn-font-warning text-center">{{ "Превышен дневной лимит загрузки нарушений. (Более 50 нарушений)"|t }}</h3>
+    </div>
+  {% else %}
+    <div id="report-app"></div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}Пользователи{% endblock %}
+{% block sub-header-title %}Пользователи{% endblock %}
+{% block sub-header-sub-title %}Управление пользователями{% endblock %}
+
+{% block sub-header-toolbar %}
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <a href="{% path admin.staff/create %}" class="btn btn-ment kt-subheader__btn-options">
+      <i class="la la-cloud-upload"></i> {{ "Добавить"|t }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Пользователи"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form kt-form--label-right kt-margin-t-10 kt-margin-b-20">
+      <div class="form-row align-items-center mb-3">
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter">{{ "Роль"|t }}</label>
+          <select class="form-control" name="role">
+            <option value=""></option>
+            <option value="admin" {% ifequal request.parameters.query.role "admin" %} selected {% endifequal %}>{{ "Администратор"|t }}</option>
+            <option value="inspector" {% ifequal request.parameters.query.role "inspector" %} selected {% endifequal %}>{{ "Инспектор"|t }}</option>
+          </select>
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter">{{ "Город или область"|t }}</label>
+          {% area-select area_id false @request.parameters.query.area_id true %}
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter ">{{ "Район"|t }}</label>
+          {% district-select district_id false @request.parameters.query.district_id true %}
+        </div>
+        <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+          <label class="font-weight-lighter">{{ "Полное имя"|t}}</label>
+          <input type="text" class="form-control" name="name" value="{{ request.parameters.query.name }}"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-6 col-sm-12 col-lg-4 px-3">
+          <button class="btn btn-outline-secondary">{{ "Поиск"|t }}</button>
+          <a href="?" class="btn btn-link">{{ "Сброс фильтра"|t }}</a>
+        </div>
+      </div>
+    </form>
+
+    {% empty-wrapper paged-rows %}
+    <table class="table">
+      <thead>
+      <tr>
+        <th>{{ "Имя пользователя"|t }} <br> {{ "Роль"|t }}</th>
+        <th>{{ "Полное имя"|t }} <br> {{ "Звание"|t }}</th>
+        <th>{{ "Номер телефона"|t }} <br> {{ "Публичный номер"|t }}</th>
+        <th>{{ "Регион"|t }}</th>
+        <th class="text-right">{{ "Действие"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for staff in paged-rows %}
+      <tr>
+        <td>
+          {{ staff.username }} {% if not staff.active %} 🚫 {% endif %}<br/>
+          {% ifequal staff.role "admin" %}
+          <span class="text-success">{{ "Администратор"|t }}</span>
+          {% else %}
+          <span class="text-danger">{{ "Инспектор"|t }}</span>
+          {% endifequal %}
+        </td>
+        <td>
+          {{ staff.first_name }} {{ staff.middle_name }} {{ staff.last_name }}<br/>
+          <span class="kt-font-info">{{ staff.rank }}</span>
+        </td>
+        <td class="align-middle">
+          {{ staff.phone|phone }}<br/>
+          <span class="kt-label-font-color-1">{{ staff.public_phone|phone }}</span>
+        </td>
+        <td class="align-middle">{% ifequal staff.role "inspector" %} {{ staff|address:false }} {% endifequal %}</td>
+
+        <td class="text-right">
+          <a href="{% path admin.staff/edit id @staff.id %}"
+             class="btn btn-sm btn-clean btn-icon btn-icon-md"
+             title="{{ "Редактировать"|t }}">
+          <i class="la la-edit"></i>
+          </a>
+          <form class="d-inline" method="post" action="{% path admin.staff/delete id @staff.id %}">
+            {% csrf-field %}
+            <button class="btn btn-sm btn-clean btn-icon btn-icon-md confirm-click" data-confirmation='{{ "Вы точно хотите удалить этого пользователя?"|t }}'>
+              <i class="la la-remove"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    {% pager @total-pages @current-page @request.query-params %}
+    {% end-empty-wrapper %}
+  </div>
+</div>
+
+{% endblock %}

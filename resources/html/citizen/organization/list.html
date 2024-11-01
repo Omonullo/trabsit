@@ -1,0 +1,69 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Юрлица"|t }} {% endblock %}
+{% block sub-header-title %}Юрлица{% endblock %}
+{% block sub-header-sub-title %}Ваши юрлица{% endblock %}
+
+{% block sub-header-toolbar %}
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <a href="{% path citizen.organization/create %}" class="btn btn-ment kt-subheader__btn-options">
+      <i class="la la-cloud-upload"></i>
+      {{ "Добавить"|t }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <span class="kt-portlet__head-icon">
+        <i class="kt-font-brand la la-group"></i>
+      </span>
+      <h3 class="kt-portlet__head-title">
+        {{ "Юрлица"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    {% empty-wrapper organizations %}
+    <table class="table">
+      <thead>
+      <tr>
+        <th>{{ "Форма и ИНН"|t }}</th>
+        <th>{{ "Название юрлица"|t }}</th>
+        <th>{{ "Банк реквизиты"|t }}</th>
+        <th class="text-right">{{ "Действия"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for organization in organizations %}
+      <tr>
+        <td>{{organization.type}}<br/>
+          <span class="kt-label-font-color-1">{{organization.inn}}</span></td>
+        <td>{{ organization.name }}<br/>
+          <span class="kt-label-font-color-1">{{ organization|address }}</span>
+        </td>
+        <td>
+          {{ organization.bank_account}}<br/>
+          <span class="kt-label-font-color-1">{{ organization.bank_mfo }}</span>
+        </td>
+        <td class="text-right">
+          <a href="{% path citizen.organization/edit id @organization.id %}" class="btn btn-sm btn-clean btn-icon btn-icon-md" title="{{ "Редактировать"|t }}">
+            <i class="la la-edit"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% end-empty-wrapper %}
+  </div>
+</div>
+
+
+{% endblock %}

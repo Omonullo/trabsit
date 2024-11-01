@@ -1,0 +1,88 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Области"|t}}{% endblock %}
+{% block sub-header-title %}{{ "Области"|t}}{% endblock %}
+
+{% block sub-header-toolbar %}
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <a href="{% path admin.area/create %}" class="btn btn-ment kt-subheader__btn-options">
+      <i class="la la-cloud-upload"></i> {{ "Добавить"|t }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Области"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>
+          {{ "Код"|t }}
+        </th>
+        <th>
+          {{ "Текст"|t }}
+        </th>
+        <th>
+          {{ "Статус"|t }}
+        </th>
+        <th class="text-right">
+          {{ "Действие"|t }}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for area in areas %}
+      <tr>
+        <td>
+          {{ area.code }}
+        </td>
+        <td>
+          <div><span class="kt-font-success"> ru </span> {{ area.name_ru }}</div>
+          <div><span class="kt-font-success"> uz </span> {{ area.name_uz_la }}</div>
+          <div><span class="kt-font-success"> ўз</span> {{ area.name_uz_cy }}</div>
+        </td>
+        <td>
+          <div>
+            {% if area.obsolete %}
+              <div class="kt-font-warning">
+                {{ "Устарел"|t }}
+              </div>
+            {% else %}
+              <div class="kt-font-success">
+                {{ "Доступен"|t }}
+              </div>
+            {% endif %}
+          </div>
+        </td>
+        <td class="text-right">
+          <a href="{% path admin.area/edit id @area.id %}"
+             class="btn btn-sm btn-clean btn-icon btn-icon-md"
+             title="{{ "Редактировать"|t }}">
+            <i class="la la-edit"></i>
+          </a>
+          <form class="d-inline" method="post" action="{% path admin.area/delete id @area.id %}">
+            {% csrf-field %}
+            <button class="btn btn-sm btn-clean btn-icon btn-icon-md confirm-click" data-confirmation='{{ "Вы точно хотите удалить эту область?"|t }}'>
+              <i class="la la-remove"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+

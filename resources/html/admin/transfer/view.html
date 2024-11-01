@@ -1,0 +1,108 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Перевод"|t }} №{{ transfer.number }}{% endblock %}
+{% block sub-header-title %} {{ "Перевод"|t }} №{{ transfer.number }} {% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-ribbon kt-ribbon--clip kt-ribbon--right kt-ribbon--{{ transfer.status|transfer-status-color }} pr-0">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Общие данные"|t }}
+      </h3>
+    </div>
+    <div class="kt-portlet__head-toolbar align-items-center">
+      {% ifequal transfer.status "created" %}
+      <form method="post" action="{% path admin.transfer/send id @transfer.id %}" class="mr-2">
+        {% csrf-field %}
+        <button type="submit" class="btn btn-sm btn-label-danger ml-2">
+          {{ "Пометить как отправленный"|t }}
+        </button>
+      </form>
+      {% endifequal %}
+
+      <div class="kt-ribbon__target">
+        <span class="kt-ribbon__inner"></span>
+        {{ transfer.status|transfer-status-name|t }}
+      </div>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <div class="row" style="margin-top: -1rem">
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Расчетный счет"|t }}</div>
+        <div>{{ transfer.bank_account }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Сумма"|t }}</div>
+        <div>{{ transfer.amount|money }} {{ "сум"|t }}</div>
+      </div>
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Дата создания"|t }}</div>
+        <div>{{ transfer.create_time|local-date-time }}</div>
+      </div>
+      {% if transfer.send_time %}
+      <div class="col-md-6 mt-3">
+        <div class="kt-label-font-color-2">{{ "Дата отправки"|t }}</div>
+        <div>{{ transfer.send_time|local-date-time }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="kt-portlet">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Вознаграждения"|t }}
+      </h3>
+    </div>
+    <div class="text-right ml-auto my-auto">
+      {{ "Количество"|t}} {{ rewards|count }}.
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <table class="table" style="min-width: 850px;">
+      <thead>
+      <tr>
+        <th>№</th>
+        <th>{{ "Гражданин"|t }} / {{ "Регион"|t }}</th>
+        <th>{{ "Данные оплаты"|t }} / {{ "Сумма"|t }}</th>
+        <th>{{ "Дата создания"|t }}</th>
+        <th class="text-right">{{ "Статус"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for reward in rewards %}
+      <tr>
+        <td>{{ reward.number }}</td>
+        <td>
+          <i class="la la-user kt-label-font-color-1"></i> {{ reward|citizen-name }}
+          <br>
+          <i class="la la-phone kt-label-font-color-1"></i> {{ reward.phone|phone }}
+        </td>
+        <td>
+          <i class="la la-cog kt-label-font-color-1"></i> <a href="{% path admin.reward/view id @reward.id %}">{{ reward.params|reward }}</a>
+          <br>
+          <i class="la la-money kt-label-font-color-1"></i> {{ reward.amount|money }} {{ "сум"|t }}
+        </td>
+        <td>
+          <i class="la la-calendar kt-label-font-color-1"></i> {{ reward.create_time|local-date-time }}
+        </td>
+        <td class="text-right">
+          <span class="kt-badge kt-badge--inline kt-badge--{{ reward.status|reward-status-color }} no-wrap"
+                {% if reward.failure_message %}
+                title="{{ reward.failure_message }}"
+                {% endif %}>
+            {{ reward.status|reward-status-name|t }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+

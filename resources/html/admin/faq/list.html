@@ -1,0 +1,69 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Часто задаваемые вопросы"|t }} {% endblock %}
+{% block sub-header-title %}{{ "Часто задаваемые вопросы"|t }} {% endblock %}
+{% block sub-header-sub-title %}{{ "Управление часто задаваемыми вопросами"|t }} {% endblock %}
+
+{% block sub-header-toolbar %}
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <a href="{% path admin.faq/create %}" class="btn btn-ment kt-subheader__btn-options">
+      <i class="la la-cloud-upload"></i>
+      {{ "Добавить"|t }}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="kt-portlet">
+  <div class="kt-portlet__head kt-portlet__head--lg">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {{ "Вопросы"|t }}
+      </h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>{{ "Номер"|t }}</th>
+        <th>{{ "Категория"|t }}</th>
+        <th>{{ "Вопрос"|t }}</th>
+        <th class="text-right">{{ "Действие"|t }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for faq in faqs %}
+      <tr>
+        <td>{{ faq.number }}</td>
+        <td>
+          <div><span class="kt-font-success"> ru </span> {{ faq.category_ru }}</div>
+          <div><span class="kt-font-success"> ўз </span> {{ faq.category_uz_cy }}</div>
+          <div><span class="kt-font-success"> uz </span> {{ faq.category_uz_la }}</div>
+        </td>
+        <td>
+          <div><span class="kt-font-success"> ru </span> {{ faq.question_ru }}</div>
+          <div><span class="kt-font-success"> ўз </span> {{ faq.question_uz_cy }}</div>
+          <div><span class="kt-font-success"> uz </span> {{ faq.question_uz_la }}</div>
+        </td>
+        <td class="text-right">
+          <a href="{% path admin.faq/edit id @faq.id %}" class="btn btn-sm btn-clean btn-icon btn-icon-md" title="{{ "Редактировать"|t }}">
+            <i class="la la-edit"></i>
+          </a>
+          <form class="d-inline" method="post" action="{% path admin.faq/delete id @faq.id %}">
+            {% csrf-field %}
+            <button class="btn btn-sm btn-clean btn-icon btn-icon-md confirm-click" data-confirmation='{{ "Вы точно хотите удалить этот вопрос?"|t }}'>
+              <i class="la la-remove"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

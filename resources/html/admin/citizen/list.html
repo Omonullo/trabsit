@@ -1,0 +1,112 @@
+{% extends "metronic/index.html" %}
+
+{% block title %}{{ "Пользователи"|t }}{% endblock %}
+{% block sub-header-title %}{{ "Пользователи"|t }}{% endblock %}
+{% block sub-header-sub-title %}{{ "Управление пользователями"|t }}{% endblock %}
+
+{% block roof %}
+    <style>
+        .kt-portlet__body .table {
+            min-width: 600px;
+        }
+
+        .kt-portlet__body .table-wrapper {
+            overflow-x: auto;
+        }
+
+        th {
+            font-weight: 500;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="kt-portlet">
+        <div class="kt-portlet__head kt-portlet__head--lg">
+            <div class="kt-portlet__head-label">
+                <h3 class="kt-portlet__head-title">
+                    {{ "Пользователи"|t }}
+                </h3>
+            </div>
+        </div>
+        <div class="kt-portlet__body">
+            <form class="kt-form kt-form--label-right kt-margin-t-10 kt-margin-b-20">
+                <div class="form-row align-items-center mb-3">
+                    <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+                        <label class="font-weight-lighter">{{ "Город или область"|t }}</label>
+                        {% area-select area_id false @request.parameters.query.area_id true %}
+                    </div>
+                    <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+                        <label class="font-weight-lighter ">{{ "Район"|t }}</label>
+                        {% district-select district_id false @request.parameters.query.district_id true %}
+                    </div>
+                    <div class="form-group col-md-6 col-sm-12 col-lg-4 mb-3 px-3">
+                        <label class="font-weight-lighter">{{ "Гражданин"|t }}</label>
+                        <input name="q"
+                               type="text"
+                               class="form-control"
+                               placeholder="{{ "Имя или телефон"|t }}"
+                               value="{{ request.parameters.query.q }}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-6 col-sm-12 col-lg-4 px-3">
+                        <button class="btn btn-outline-secondary">{{ "Поиск"|t }}</button>
+                        <a href="?" class="btn btn-link">{{ "Сброс фильтра"|t }}</a>
+                    </div>
+                    <div class="col-md-6 col-sm-12 col-lg-8 p-3 text-right">
+                        {{ "Количество"|t}} {{ count }}.
+                    </div>
+                </div>
+            </form>
+
+            {% empty-wrapper paged-rows %}
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>{{ "Полное имя"|t }} </th>
+                        <th>{{ "Номер телефона"|t }} </th>
+                        <th>{{ "Email"|t }} </th>
+                        <th class="text-right">{{ "Сумма вознаграждений"|t }} </th>
+                        <th class="text-right">{{ "Действие"|t }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for citizen in paged-rows %}
+                    <tr>
+                        <td>
+                            {{ citizen.first_name }} {{ citizen.last_name }} {{ citizen.middle_name }}<br/>
+                        </td>
+                        <td class="align-middle text-nowrap">
+                            {{ citizen.phone|phone }}<br/>
+                        </td>
+                        <td class="align-middle text-nowrap">{{ citizen.email }}</td>
+
+                        <td class="align-middle text-right">{{ citizen.reward_sum|money }} {{ "сум"|t }}</td>
+
+                        <td class="text-nowrap text-right align-middle">
+                            <a href="{% path staff.report/index ? citizen_id @citizen.id %}"
+                               class="btn btn-sm btn-clean btn-icon btn-icon-md"
+                               title="{{ "Видеозаписи"|t }}">
+                                <i class="la la-file-movie-o"></i>
+                            </a>
+                            <div class="d-inline">
+                                <a href="{% path admin.citizen/edit id @citizen.id %}"
+                                   class="btn btn-sm btn-clean btn-icon btn-icon-md"
+                                   title="{{ "Редактировать"|t }}">
+                                    <i class="la la-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% pager @total-pages @current-page @request.query-params %}
+            {% end-empty-wrapper %}
+        </div>
+    </div>
+
+{% endblock %}

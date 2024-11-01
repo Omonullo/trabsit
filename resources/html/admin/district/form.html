@@ -1,0 +1,141 @@
+{% extends "metronic/index.html" %}
+
+
+{% block title %}
+  {% if district.id %}
+    {{ "Район"|t }}№{{ district.number }}
+  {% else %}
+     {{ "Новый район"|t }}
+  {% endif %}
+{% endblock %}
+{% block sub-header-title %}
+  {% if district.id %}
+    {{ "Район"|t }}№{{ district.number }}
+  {% else %}
+     {{ "Новый район"|t }}
+  {% endif %}
+{% endblock %}
+{% block sub-header-sub-title %}
+  {% if district.id %}
+    {{ "Редактирование района"|t }}
+  {% else %}
+    {{ "Создание района"|t }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="kt-portlet kt-portlet--height-fluid">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        {% if district.id %}
+          {{ "Район"|t }} №{{ district.number }}
+        {% else %}
+          {{ "Новый район"|t }}
+        {% endif %}</h3>
+    </div>
+  </div>
+  <div class="kt-portlet__body">
+    <form class="kt-form pt-4 pb-4" method="post">
+      {% csrf-field %}
+      <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">{{ "Город или область"|t }}
+            </label>
+            <div class="col-md-9">
+              <select name="area_id" class="form-control" required>
+                <option value=""></option>
+                {% for area in areas %}
+                <option value="{{ area.id }}" {% ifequal district.area_id area.id %} selected {% endifequal %}>{{ area|t-get:name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+              {{ "Название"|t }}
+              <span class="kt-font-success"> ru </span></label>
+            <div class="col-md-9">
+              <input type="text" class="form-control" required name="name_ru" value="{{ district.name_ru }}"/>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+              {{ "Название"|t }}
+              <span class="kt-font-success"> uz </span></label>
+            <div class="col-md-9">
+              <input type="text" class="form-control" required name="name_uz_la" value="{{ district.name_uz_la }}"/>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+              {{ "Название"|t }}
+              <span class="kt-font-success"> ўз</span></label>
+            <div class="col-md-9">
+              <input type="text" class="form-control" required name="name_uz_cy" value="{{ district.name_uz_cy }}"/>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+              {{ "Yandex Имя"|t }}
+              <span class="kt-font-success"> ru </span></label>
+            <div class="col-md-9">
+              <input type="text" class="form-control" name="yname_ru" value="{{ district.yname_ru }}"/>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+              {{ "Yandex Имя"|t }}
+              <span class="kt-font-success"> uz </span></label>
+            <div class="col-md-9">
+              <input type="text" class="form-control" name="yname_uz_la" value="{{ district.yname_uz_la }}"/>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+              {{ "Yandex Имя"|t }}
+              <span class="kt-font-success"> ўз</span></label>
+            <div class="col-md-9">
+              <input type="text" class="form-control" name="yname_uz_cy" value="{{ district.yname_uz_cy }}"/>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+              {{ "Код"|t }}</label>
+            <div class="col-md-9">
+              <input type="number" class="form-control" name="code" value="{{ district.code }}"/>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3">{{ "Устарел"|t }}</div>
+            <div class="col-sm-9">
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="obsolete"
+                        {% if district.obsolete %}
+                          checked
+                        {% endif %}>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3">
+            </div>
+            <div class="col-md-9">
+              <button type="submit" class="btn btn-success mr-2">{{ "Сохранить"|t }}</button>
+              <button type="reset" class="btn btn-secondary" onclick="history.go(-1)">{{ "Назад"|t }}</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2"></div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

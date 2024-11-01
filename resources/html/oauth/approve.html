@@ -1,0 +1,76 @@
+{% extends "metronic/base.html" %}
+
+{% block title %}videoJarima - {{ "Сделаем дороги безопасными вместе"|t }}{% endblock %}
+
+{% block roof %}
+<link rel="stylesheet" href="/css/login.css">
+{% endblock %}
+
+{% block floor %}
+<script src="/js/login.js" type="module"></script>
+{% endblock %}
+
+{% block page %}
+<div class="container-fluid flex-grow-1 d-flex flex-column">
+  <div class="row my-auto justify-content-center">
+    <div class="col-12 d-flex justify-content-center mb-5">
+      <div>
+        <a href="{{auth_request.stored_client.url}}">
+          <img src="{{auth_request.stored_client.logo}}" width="120">
+        </a>
+      </div>
+      <div class="my-auto px-4">
+        <i class="fa fa-lock-open kt-font-xl "></i>
+      </div>
+      <div>
+        <a href="/login">
+          <img src="/img/logo.svg" width="120">
+        </a>
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 px-0 kt-portlet">
+      <div class="kt-portlet__head py-3 pr-5">
+        <div class="kt-portlet__head-label">
+          <div class="kt-portlet__head-title">
+            {{ request.identity.first_name }},
+            {{"приложение <strong>%s</strong> запрашивает разрешение на:"|t:@auth_request.stored_client.name}}
+          </div>
+        </div>
+        <div class="kt-header__topbar kt-grid__item">
+          {% language-bar %}
+        </div>
+      </div>
+      <form class="kt-form" action="/oauth/approve" method="post">
+        {% csrf-field %}
+        <input type="hidden" name="scope" value="{{ auth_request.scope|join:"," }}">
+        <input type="hidden" name="state" value="{{ auth_request.state }}">
+        <input type="hidden" name="client_id" value="{{ auth_request.client_id }}">
+        <input type="hidden" name="response_type" value="{{ auth_request.response_type }}">
+        <input type="hidden" name="use_default_uri" value="{{ auth_request.use_default_uri }}">
+        <input type="hidden" name="redirect_uri" value="{{ auth_request.redirect_uri }}">
+        <div class="kt-notification-v2">
+          {% for scope in scopes %}
+          <a href="#" class="kt-notification-v2__item">
+            <div class="kt-notification-v2__item-icon">
+              <i class="{{scope.icon}} kt-font-success"></i>
+            </div>
+            <div class="kt-notification-v2__itek-wrapper">
+              <div class="kt-notification-v2__item-title">
+                {{scope.name}}
+              </div>
+              <div class="kt-notification-v2__item-desc">
+                {{scope.description}}
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+        <div class="kt-portlet__foot p-3">
+          <button type="submit" class="btn btn-success text-center w-100">{{"Разрешить"|t}}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
