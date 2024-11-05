@@ -51,7 +51,7 @@
     "bootstrap-datetime-picker": "^2.4.4",
     "bootstrap-datetimepicker": "^0.0.7",
     "bootstrap-markdown": "^2.10.0",
-    "bootstrap-maxlength": "^1.6.0",
+    "bootstrap-maxlength": "^2.0.0",
     "bootstrap-timepicker": "^0.5.2",
     "bootstrap-vue": "^2.0.0-rc.28",
     "bootstrap4-notify": "^4.0.3",
